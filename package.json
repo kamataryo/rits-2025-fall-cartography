@@ -18,12 +18,12 @@
     "slides",
     "education"
   ],
-  "author": "立命館大学",
+  "author": "kamataryo (ryo@kamataworks.com)",
   "license": "MIT",
   "devDependencies": {
     "@marp-team/marp-cli": "^3.4.0"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=22.0.0"
   }
 }
