@@ -1,4 +1,4 @@
-# MapLibre GL JS と OpenStreetMap で始めるウェブカートグラフィ入門
+# 立命館大学 2025年度秋学期 ウェブカートグラフィ入門
 
 立命館大学 2025年度秋学期の授業スライドリポジトリです。
 
@@ -23,15 +23,20 @@ rits-2025-fall-cartography/
 │   └── cartography-theme.css
 ├── slides/                  # 授業スライド（Markdown）
 │   ├── 01-introduction.md
-│   ├── 02-openstreetmap.md
-│   ├── 03-maplibre-basics.md
-│   ├── ...
-│   └── 14-presentation.md
+│   ├── 02-spatial-data-basics.md
+│   ├── 03-04-openstreetmap-culture.md
+│   ├── 05-geojson-basics.md
+│   ├── 06-web-map-components.md
+│   ├── 07-08-maplibre-operations.md
+│   ├── 09-styling-basics.md
+│   ├── 10-vector-tiles.md
+│   ├── 11-project-planning.md
+│   ├── 12-project-completion.md
+│   └── 13-14-project-presentation.md
 ├── assets/                  # 画像・動画素材
-│   ├── images/
-│   └── videos/
+│   └── images/
 ├── output/                  # 生成されたスライド
-│   ├── html/               # HTML形式
+│   ├── *.html              # HTML形式（直下）
 │   ├── pdf/                # PDF形式
 │   └── pptx/               # PowerPoint形式
 └── scripts/                # ビルドスクリプト
@@ -44,7 +49,7 @@ rits-2025-fall-cartography/
 
 ### 1. 必要なソフトウェア
 
-- **Node.js** (v16以上)
+- **Node.js** (v22以上)
 - **npm** または **yarn**
 - **Git**
 
@@ -82,46 +87,38 @@ npm run build:all
 
 #### 個別生成
 ```bash
-# HTML生成
+# HTML生成（output/直下に生成）
 npm run build
 
-# PDF生成
+# PDF生成（output/pdf/に生成）
 npm run build:pdf
 
-# PPTX生成
+# PPTX生成（output/pptx/に生成）
 npm run build:pptx
 ```
 
 ### 開発モード
 
 ```bash
-# ファイル監視モード（自動リビルド）
-npm run watch
-# または
-./scripts/watch.sh
-
-# サーバーモード（ブラウザで確認）
-npm run serve
+# 開発サーバー起動（ファイル監視・自動リビルド）
+npm run dev
 ```
 
 ## 📋 授業計画
 
 | 回 | テーマ | ファイル |
 |----|--------|----------|
-| 1 | 地図とウェブカートグラフィの基礎 | `01-introduction.md` |
-| 2 | OpenStreetMapの理解 | `02-openstreetmap.md` |
-| 3 | MapLibre GL JSの基礎 | `03-maplibre-basics.md` |
-| 4 | 地図のスタイリング | `04-map-styling.md` |
-| 5 | データの可視化 | `05-data-visualization.md` |
-| 6 | インタラクション機能 | `06-interaction.md` |
-| 7 | レイヤーとフィルタリング | `07-layers-filtering.md` |
-| 8 | 3D表現と地形表示 | `08-3d-terrain.md` |
-| 9 | アニメーションと時系列データ | `09-animation-timeseries.md` |
-| 10 | 位置情報とGPS | `10-location-gps.md` |
-| 11 | 外部データとの連携 | `11-external-data.md` |
-| 12 | パフォーマンス最適化 | `12-performance.md` |
-| 13 | 実践プロジェクト | `13-project.md` |
-| 14 | 発表・まとめ | `14-presentation.md` |
+| 1 | イントロダクション | `01-introduction.md` |
+| 2 | 空間データの基礎 | `02-spatial-data-basics.md` |
+| 3-4 | OpenStreetMapの文化と実践 | `03-04-openstreetmap-culture.md` |
+| 5 | GeoJSONの基礎 | `05-geojson-basics.md` |
+| 6 | ウェブ地図コンポーネント | `06-web-map-components.md` |
+| 7-8 | MapLibreの操作 | `07-08-maplibre-operations.md` |
+| 9 | スタイリングの基礎 | `09-styling-basics.md` |
+| 10 | ベクタータイル | `10-vector-tiles.md` |
+| 11 | プロジェクト計画 | `11-project-planning.md` |
+| 12 | プロジェクト完成 | `12-project-completion.md` |
+| 13-14 | プロジェクト発表 | `13-14-project-presentation.md` |
 
 ## 🎨 カスタムテーマ
 
@@ -207,10 +204,10 @@ const map = new maplibregl.Map({
 
 ```bash
 # 詳細ログでビルド
-npx marp --config marp.config.js slides/ --output output/html/ --verbose
+npx marp --config marp.config.js slides/ --output output/ --verbose
 
 # 特定のファイルのみビルド
-npx marp slides/01-introduction.md --output output/html/
+npx marp slides/01-introduction.md --output output/
 ```
 
 ## 📚 参考資料
@@ -233,13 +230,9 @@ npx marp slides/01-introduction.md --output output/html/
 
 授業改善のための提案やバグ報告は、GitHubのIssueまたはPull Requestでお願いします。
 
-## 📞 連絡先
-
-- **担当教員**: [教員名]
-- **メール**: [メールアドレス]
-- **オフィスアワー**: [曜日・時間]
+- **担当教員**: 鎌田 遼
 
 ---
 
 **立命館大学 2025年度秋学期**  
-**MapLibre GL JS と OpenStreetMap で始めるウェブカートグラフィ入門**
+**ウェブカートグラフィ入門**
