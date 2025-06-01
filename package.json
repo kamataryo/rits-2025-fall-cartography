@@ -4,12 +4,11 @@
   "description": "立命館大学 2025年度秋学期 ウェブカートグラフィ入門 授業スライド",
   "main": "index.js",
   "scripts": {
-    "build": "marp --config marp.config.js -I slides/ -o output/html/",
+    "build": "marp --config marp.config.js -I slides/ -o output/",
     "build:pdf": "marp --config marp.config.js -I slides/ --pdf -o output/pdf/",
     "build:pptx": "marp --config marp.config.js -I slides/ --pptx -o output/pptx/",
-    "build:all": "npm run build && npm run build:pdf && npm run build:pptx",
-    "watch": "marp --config marp.config.js -I slides/ --watch -o output/html/",
-    "serve": "marp --config marp.config.js -I slides/ --server -o output/html/"
+    "build:all": "rm -rf output && npm run build && npm run build:pdf && npm run build:pptx",
+    "dev": "marp -w -s --config marp.config.js -I slides/ --watch -o output/html/"
   },
   "keywords": [
     "cartography",
