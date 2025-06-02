@@ -155,7 +155,7 @@ function generateTemplate(lesson) {
 
   return `---
 marp: true
-theme: cartography
+theme: default
 class: title
 paginate: true
 ---
