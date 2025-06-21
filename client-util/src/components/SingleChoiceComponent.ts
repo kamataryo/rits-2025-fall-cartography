@@ -1,4 +1,5 @@
 import { BaseVoteComponent } from './BaseVoteComponent';
+import { VoteComponentState } from '../types/index';
 
 export class SingleChoiceComponent extends BaseVoteComponent {
   private selectedValue: string = '';
@@ -151,6 +152,10 @@ export class SingleChoiceComponent extends BaseVoteComponent {
 
     if (content) {
       this.sendVote(content);
+      // 投票後、状態をREADYに戻す（再投票可能にする）
+      setTimeout(() => {
+        this.setState(this.state === VoteComponentState.VOTING ? VoteComponentState.READY : this.state);
+      }, 1000);
     }
   }
 }

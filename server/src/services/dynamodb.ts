@@ -79,6 +79,28 @@ export class DynamoDBService {
     await client.send(command);
   }
 
+  // 投票を削除
+  async deleteVote(key: string, voteId: string): Promise<void> {
+    const command = new DeleteItemCommand({
+      TableName: VOTES_TABLE,
+      Key: marshall({
+        key,
+        voteId,
+      }),
+    });
+
+    await client.send(command);
+  }
+
+  // 複数の投票を削除
+  async deleteVotesByIds(key: string, voteIds: string[]): Promise<void> {
+    const deletePromises = voteIds.map(voteId =>
+      this.deleteVote(key, voteId)
+    );
+
+    await Promise.all(deletePromises);
+  }
+
   // 全接続を取得
   async getAllConnections(): Promise<ConnectionItem[]> {
     const command = new ScanCommand({

@@ -12,7 +12,7 @@ export abstract class BaseVoteComponent extends HTMLElement {
   protected voteKey: string = '';
   protected options: string[] = [];
   protected state: VoteComponentState = VoteComponentState.CONNECTING;
-  protected hasVoted: boolean = false;
+  protected voteIds: string[] = [];  // hasVoted から変更
   protected voteResults: VoteUpdateMessage | null = null;
   protected chartType: 'bar' | 'pie' = 'bar';
   protected chart: Chart | null = null;
@@ -86,10 +86,9 @@ export abstract class BaseVoteComponent extends HTMLElement {
         this.setState(VoteComponentState.CONNECTING);
         break;
       case WebSocketState.CONNECTED:
-        if (!this.hasVoted) {
-          this.setState(VoteComponentState.READY);
-        } else {
-          // 投票済みの場合、結果を要求
+        this.setState(VoteComponentState.READY);
+        // 投票済みの場合、結果を要求
+        if (this.voteIds.length > 0) {
           this.requestVoteResult();
         }
         break;
@@ -107,14 +106,47 @@ export abstract class BaseVoteComponent extends HTMLElement {
     if (voteUpdate.data.key === this.voteKey) {
       this.voteResults = voteUpdate;
 
-      // 投票済み状態でチャートが既に存在する場合は、HTMLとチャートを更新
-      if (this.state === VoteComponentState.VOTED && this.chart) {
+      // userVoteId が返された場合は保存
+      if (voteUpdate.data.userVoteId) {
+        this.voteIds = [voteUpdate.data.userVoteId];
+        this.saveVoteState(this.voteIds);
+      }
+
+      // 結果セクションが既に存在するかチェック
+      const existingResults = this.shadowRoot?.querySelector('.results');
+
+      if (existingResults) {
+        // 既存の結果セクションがある場合は、結果部分のみ更新
         this.updateResultsDisplay();
         setTimeout(() => this.renderChart(), 0);
       } else {
-        this.render();
+        // 結果セクションがない場合は動的に追加
+        this.addResultsSection();
       }
     }
+  }
+  // 結果セクションを動的に追加するメソッド
+  private addResultsSection(): void {
+    if (!this.shadowRoot || !this.voteResults) return;
+
+    const container = this.shadowRoot.querySelector('.vote-container');
+    if (!container) return;
+
+    // 区切り線と結果セクションを追加
+    const resultsHtml = `
+      <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+      <div class="results">
+        <h3>投票結果 (総投票数: ${this.voteResults.data.totalCount})</h3>
+        <div class="chart-container">
+          <canvas id="vote-chart" width="400" height="300"></canvas>
+        </div>
+      </div>
+    `;
+
+    container.insertAdjacentHTML('beforeend', resultsHtml);
+
+    // チャートを描画
+    setTimeout(() => this.renderChart(), 0);
   }
 
   protected setState(newState: VoteComponentState): void {
@@ -131,12 +163,10 @@ export abstract class BaseVoteComponent extends HTMLElement {
     }
 
     this.setState(VoteComponentState.VOTING);
-    webSocketService.sendVote(this.voteKey, content);
 
-    // 投票状態を保存
-    this.saveVoteState(content);
-    this.hasVoted = true;
-    this.setState(VoteComponentState.VOTED);
+    // 単一投票の場合、既存のvoteIdを使用
+    const existingVoteId = this.voteIds[0] || undefined;
+    webSocketService.sendVote(this.voteKey, content, existingVoteId);
   }
 
   private loadVoteState(): void {
@@ -144,19 +174,18 @@ export abstract class BaseVoteComponent extends HTMLElement {
       const stored = localStorage.getItem(`vote-${this.voteKey}`);
       if (stored) {
         const voteRecord = JSON.parse(stored);
-        this.hasVoted = true;
-        this.setState(VoteComponentState.VOTED);
+        this.voteIds = voteRecord.voteIds || [];
       }
     } catch (error) {
       console.error('Failed to load vote state:', error);
     }
   }
 
-  private saveVoteState(content: string): void {
+  private saveVoteState(voteIds: string[]): void {
     try {
       const voteRecord = {
         voteKey: this.voteKey,
-        content: [content],
+        voteIds: voteIds,
         timestamp: Date.now()
       };
       localStorage.setItem(`vote-${this.voteKey}`, JSON.stringify(voteRecord));
@@ -193,13 +222,8 @@ export abstract class BaseVoteComponent extends HTMLElement {
         container.innerHTML = this.renderConnecting();
         break;
       case VoteComponentState.READY:
-        container.innerHTML = this.renderVoteForm();
-        break;
       case VoteComponentState.VOTING:
-        container.innerHTML = this.renderVoting();
-        break;
-      case VoteComponentState.VOTED:
-        container.innerHTML = this.renderResults();
+        container.innerHTML = this.renderFormAndResults();
         break;
       case VoteComponentState.ERROR:
         container.innerHTML = this.renderError();
@@ -217,10 +241,42 @@ export abstract class BaseVoteComponent extends HTMLElement {
     // イベントリスナーを設定
     this.setupEventListeners();
 
-    // Chart.jsの描画（結果表示時のみ）
-    if (this.state === VoteComponentState.VOTED && this.voteResults) {
+    // Chart.jsの描画（結果がある場合）
+    if (this.voteResults) {
       setTimeout(() => this.renderChart(), 0);
     }
+  }
+  // 新しいレンダリングメソッド：フォームと結果を同時表示
+  protected renderFormAndResults(): string {
+    let html = '';
+
+    // 投票中の場合は投票中表示
+    if (this.state === VoteComponentState.VOTING) {
+      html += `
+        <div class="status voting">
+          <span class="spinner"></span>
+          投票中...
+        </div>
+      `;
+    } else {
+      // 通常時は投票フォームを表示
+      html += this.renderVoteForm();
+    }
+
+    // 投票結果がある場合は結果も表示
+    if (this.voteResults) {
+      html += `
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+        <div class="results">
+          <h3>投票結果 (総投票数: ${this.voteResults.data.totalCount})</h3>
+          <div class="chart-container">
+            <canvas id="vote-chart" width="400" height="300"></canvas>
+          </div>
+        </div>
+      `;
+    }
+
+    return html;
   }
 
   protected renderConnecting(): string {
@@ -281,7 +337,10 @@ export abstract class BaseVoteComponent extends HTMLElement {
     if (!this.shadowRoot || !this.voteResults) return;
 
     const canvas = this.shadowRoot.querySelector('#vote-chart') as HTMLCanvasElement;
-    if (!canvas) return;
+    if (!canvas) {
+      console.warn('Canvas element not found for chart rendering');
+      return;
+    }
 
     const { summary } = this.voteResults.data;
     const entries = Object.entries(summary).sort(([,a], [,b]) => b - a);
@@ -295,24 +354,41 @@ export abstract class BaseVoteComponent extends HTMLElement {
     ];
 
     // 既存のチャートがある場合はデータを更新
-    if (this.chart) {
-      this.chart.data.labels = labels;
-      this.chart.data.datasets[0].data = data;
+    if (this.chart && this.chart.canvas && this.chart.canvas.parentNode) {
+      try {
+        this.chart.data.labels = labels;
+        this.chart.data.datasets[0].data = data;
 
-      // 色を更新（棒グラフ・パイチャート共通）
-      this.chart.data.datasets[0].backgroundColor = this.chartType === 'pie'
-        ? colors.slice(0, data.length)
-        : colors.slice(0, data.length);
-      this.chart.data.datasets[0].borderColor = this.chartType === 'pie'
-        ? colors.slice(0, data.length)
-        : colors.slice(0, data.length);
+        // 色を更新（棒グラフ・パイチャート共通）
+        this.chart.data.datasets[0].backgroundColor = this.chartType === 'pie'
+          ? colors.slice(0, data.length)
+          : colors.slice(0, data.length);
+        this.chart.data.datasets[0].borderColor = this.chartType === 'pie'
+          ? colors.slice(0, data.length)
+          : colors.slice(0, data.length);
 
-      // インクリメンタルアニメーションで更新
-      this.chart.update('active');
-      return;
+        // インクリメンタルアニメーションで更新
+        this.chart.update('active');
+        return;
+      } catch (error) {
+        console.warn('Chart update failed, recreating chart:', error);
+        // チャートの更新に失敗した場合は破棄して再作成
+        this.chart.destroy();
+        this.chart = null;
+      }
     }
 
-    // 初回作成時
+    // 既存のチャートを破棄（canvas要素が変わった場合）
+    if (this.chart) {
+      try {
+        this.chart.destroy();
+      } catch (error) {
+        console.warn('Chart destroy failed:', error);
+      }
+      this.chart = null;
+    }
+
+    // 初回作成時または再作成時
     const chartConfig: any = {
       type: this.chartType === 'bar' ? 'bar' : 'pie',
       data: {
@@ -360,7 +436,11 @@ export abstract class BaseVoteComponent extends HTMLElement {
       };
     }
 
-    this.chart = new Chart(canvas, chartConfig);
+    try {
+      this.chart = new Chart(canvas, chartConfig);
+    } catch (error) {
+      console.error('Failed to create chart:', error);
+    }
   }
 
   protected getStyles(): string {

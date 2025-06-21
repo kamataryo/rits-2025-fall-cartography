@@ -1,16 +1,9 @@
 import { BaseVoteComponent } from './BaseVoteComponent';
+import { VoteComponentState } from '../types/index';
+import { webSocketService } from '../services/WebSocketService';
 
 export class MultiChoiceComponent extends BaseVoteComponent {
   private selectedValues: Set<string> = new Set();
-  private keepActive: boolean = false;
-
-  override connectedCallback(): void {
-    super.connectedCallback();
-
-    // keep-active属性の解析
-    const keepActiveAttr = this.getAttribute('keep-active');
-    this.keepActive = keepActiveAttr === 'true';
-  }
 
   protected renderVoteForm(): string {
     if (this.options.length === 0) {
@@ -63,40 +56,7 @@ export class MultiChoiceComponent extends BaseVoteComponent {
     `;
   }
 
-  protected override renderResults(): string {
-    if (!this.voteResults) {
-      return `
-        <div class="results">
-          <h3>投票完了</h3>
-          <p>結果を集計中...</p>
-        </div>
-      `;
-    }
-
-    const { summary, totalCount } = this.voteResults.data;
-
-    let resultsHtml = `
-      <div class="results">
-        <h3>投票結果 (総投票数: ${totalCount})</h3>
-        <div class="chart-container">
-          <canvas id="vote-chart" width="400" height="300"></canvas>
-        </div>
-      </div>
-    `;
-
-    // keep-activeが有効で、かつ選択肢がある場合は、投票フォームも表示
-    if (this.keepActive && this.options.length > 0) {
-      resultsHtml += `
-        <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
-        <div class="continue-voting">
-          <h4>追加で投票する</h4>
-          ${this.renderVoteForm()}
-        </div>
-      `;
-    }
-
-    return resultsHtml;
-  }
+  // renderResults メソッドを削除（BaseVoteComponent の renderFormAndResults を使用）
 
 
   protected setupEventListeners(): void {
@@ -204,7 +164,7 @@ export class MultiChoiceComponent extends BaseVoteComponent {
         }
       }
     } else {
-      // 選択肢がある場合 - 連続でメッセージを送信
+      // 選択肢がある場合 - 既存の投票を全削除してから新規投票
       const votesToSend: string[] = [];
 
       this.selectedValues.forEach(value => {
@@ -222,21 +182,27 @@ export class MultiChoiceComponent extends BaseVoteComponent {
         }
       });
 
-      // 連続で投票を送信
+      // 既存の投票を削除してから新規投票を送信
       votesToSend.forEach((content, index) => {
+        const existingVoteId = this.voteIds[index] || undefined;
         setTimeout(() => {
-          this.sendVote(content);
+          webSocketService.sendVote(this.voteKey, content, existingVoteId);
         }, index * 100); // 100ms間隔で送信
       });
 
-      if (!this.keepActive) {
-        // keep-activeが無効の場合は通常通り投票完了状態に
-        this.hasVoted = true;
-        this.setState(this.state); // 状態を更新してレンダリング
-      } else {
-        // keep-activeが有効の場合は選択をクリア
-        this.clearSelections();
+      // 余分な既存投票を削除（空文字で削除）
+      if (this.voteIds.length > votesToSend.length) {
+        for (let i = votesToSend.length; i < this.voteIds.length; i++) {
+          setTimeout(() => {
+            webSocketService.sendVote(this.voteKey, '', this.voteIds[i]);
+          }, (i + votesToSend.length) * 100);
+        }
       }
+
+      // 投票後、状態をREADYに戻す（再投票可能にする）
+      setTimeout(() => {
+        this.setState(this.state === VoteComponentState.VOTING ? VoteComponentState.READY : this.state);
+      }, 1000);
     }
   }
 
@@ -263,19 +229,7 @@ export class MultiChoiceComponent extends BaseVoteComponent {
     this.updateSubmitButton();
   }
 
-  protected override sendVote(content: string): void {
-    // 基底クラスのsendVoteをオーバーライドして、keep-activeの場合は状態変更を抑制
-    if (this.keepActive) {
-      // WebSocketサービスに直接送信（状態変更なし）
-      const webSocketService = (window as any).webSocketService;
-      if (webSocketService && webSocketService.getState() === 'connected') {
-        webSocketService.sendVote(this.voteKey, content);
-      }
-    } else {
-      // 通常の投票処理
-      super.sendVote(content);
-    }
-  }
+  // sendVoteのオーバーライドを削除（BaseVoteComponentの実装を使用）
 }
 
 // WebComponentとして登録

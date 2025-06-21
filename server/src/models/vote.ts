@@ -17,6 +17,7 @@ export interface Vote {
 export interface VoteMessage extends WebSocketMessage<{
   key: string;
   content: string;
+  voteId?: string;  // 既存投票のID（置換時に使用）
 }> {
   type: 'VOTE';
 }
@@ -34,6 +35,7 @@ export interface VoteUpdateMessage extends WebSocketMessage<{
   key: string;
   summary: Record<string, number>;
   totalCount: number;
+  userVoteId?: string;  // 投票したユーザーのvoteId
 }> {
   type: 'VOTE_UPDATE';
 }

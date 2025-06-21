@@ -34,6 +34,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         return createWebSocketResponse(400);
       }
 
+      // 既存投票の削除（置換の場合）
+      if (voteMessage.data.voteId) {
+        try {
+          await dynamoDBService.deleteVote(voteMessage.data.key, voteMessage.data.voteId);
+          console.log(`Existing vote deleted: ${voteMessage.data.voteId} for key: ${voteMessage.data.key}`);
+        } catch (error) {
+          console.error('Failed to delete existing vote:', error);
+          // 削除に失敗しても新規投票は続行
+        }
+      }
+
       // 投票データを作成
       const now = new Date().toISOString();
       const ttl = Math.floor(Date.now() / 1000) + 3600; // 1時間後
@@ -51,8 +62,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
       console.log(`Vote saved: ${vote.voteId} for key: ${vote.key}`);
 
-      // 全クライアントに投票結果をブロードキャスト
-      await webSocketService.broadcastVoteUpdate(event, vote.key);
+      // 全クライアントに投票結果をブロードキャスト（userVoteIdを含む）
+      await webSocketService.broadcastVoteUpdate(event, vote.key, vote.voteId);
 
     } else if (message.type === 'REQUEST_VOTE_RESULT') {
       // 投票結果要求処理

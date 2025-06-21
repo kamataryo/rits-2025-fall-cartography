@@ -63,7 +63,7 @@ export class WebSocketService extends EventTarget {
     this.reconnectAttempts = 0;
   }
 
-  public sendVote(voteKey: string, content: string): void {
+  public sendVote(voteKey: string, content: string, voteId?: string): void {
     if (this.state !== WebSocketState.CONNECTED || !this.ws) {
       console.warn('WebSocket not connected. Cannot send vote.');
       return;
@@ -74,7 +74,8 @@ export class WebSocketService extends EventTarget {
       type: 'VOTE',
       data: {
         key: voteKey,
-        content: content
+        content: content,
+        voteId: voteId
       }
     };
 

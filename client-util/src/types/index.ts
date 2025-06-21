@@ -8,6 +8,7 @@ export interface WebSocketMessage<T = any> {
 export interface VoteMessage extends WebSocketMessage<{
   key: string;
   content: string;
+  voteId?: string;  // 既存投票のID（置換時に使用）
 }> {
   action: 'vote';
   type: 'VOTE';
@@ -26,6 +27,7 @@ export interface VoteUpdateMessage extends WebSocketMessage<{
   key: string;
   summary: Record<string, number>;
   totalCount: number;
+  userVoteId?: string;  // 投票したユーザーのvoteId
 }> {
   type: 'VOTE_UPDATE';
 }
@@ -35,7 +37,6 @@ export enum VoteComponentState {
   CONNECTING = 'connecting',
   READY = 'ready',
   VOTING = 'voting',
-  VOTED = 'voted',
   ERROR = 'error'
 }
 
@@ -57,14 +58,12 @@ export interface BaseVoteComponentProps {
 export interface SingleChoiceProps extends BaseVoteComponentProps {}
 
 // 複数選択コンポーネントプロパティ
-export interface MultiChoiceProps extends BaseVoteComponentProps {
-  keepActive: boolean;
-}
+export interface MultiChoiceProps extends BaseVoteComponentProps {}
 
 // 投票データ（LocalStorage用）
 export interface VoteRecord {
   voteKey: string;
-  content: string[];
+  voteIds: string[];  // content[] から変更
   timestamp: number;
 }
 
