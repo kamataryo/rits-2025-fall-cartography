@@ -37,6 +37,26 @@ export class DynamoDBService {
     return items.map(item => unmarshall(item)) as Vote[];
   }
 
+  // 特定キーの投票結果サマリーを取得
+  async getVoteSummaryByKey(key: string): Promise<{key: string, summary: Record<string, number>, totalCount: number} | null> {
+    const votes = await this.getVotesByKey(key);
+
+    if (votes.length === 0) {
+      return null;
+    }
+
+    const summary: Record<string, number> = {};
+    votes.forEach(vote => {
+      summary[vote.content] = (summary[vote.content] || 0) + 1;
+    });
+
+    return {
+      key,
+      summary,
+      totalCount: votes.length
+    };
+  }
+
   // 接続を保存
   async saveConnection(connection: ConnectionItem): Promise<void> {
     const command = new PutItemCommand({

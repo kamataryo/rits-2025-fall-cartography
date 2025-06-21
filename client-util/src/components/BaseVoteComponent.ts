@@ -5,6 +5,7 @@ import {
   BaseVoteComponentProps
 } from '../types/index';
 import { webSocketService } from '../services/WebSocketService';
+import Chart from 'chart.js/auto';
 
 
 export abstract class BaseVoteComponent extends HTMLElement {
@@ -13,6 +14,8 @@ export abstract class BaseVoteComponent extends HTMLElement {
   protected state: VoteComponentState = VoteComponentState.CONNECTING;
   protected hasVoted: boolean = false;
   protected voteResults: VoteUpdateMessage | null = null;
+  protected chartType: 'bar' | 'pie' = 'bar';
+  protected chart: Chart | null = null;
 
   constructor() {
     super();
@@ -33,6 +36,7 @@ export abstract class BaseVoteComponent extends HTMLElement {
   private parseAttributes(): void {
     this.voteKey = this.getAttribute('vote-key') || '';
     const optionsAttr = this.getAttribute('options');
+    const chartTypeAttr = this.getAttribute('chart-type') || 'bar';
 
     if (optionsAttr) {
       try {
@@ -44,6 +48,12 @@ export abstract class BaseVoteComponent extends HTMLElement {
     } else {
       this.options = [];
     }
+
+    // chart-type属性の検証
+    if (chartTypeAttr !== 'bar' && chartTypeAttr !== 'pie') {
+      throw new Error(`Invalid chart-type: ${chartTypeAttr}. Must be 'bar' or 'pie'.`);
+    }
+    this.chartType = chartTypeAttr as 'bar' | 'pie';
 
     if (!this.voteKey) {
       console.error('vote-key attribute is required');
@@ -78,6 +88,9 @@ export abstract class BaseVoteComponent extends HTMLElement {
       case WebSocketState.CONNECTED:
         if (!this.hasVoted) {
           this.setState(VoteComponentState.READY);
+        } else {
+          // 投票済みの場合、結果を要求
+          this.requestVoteResult();
         }
         break;
       case WebSocketState.DISCONNECTED:
@@ -93,7 +106,14 @@ export abstract class BaseVoteComponent extends HTMLElement {
 
     if (voteUpdate.data.key === this.voteKey) {
       this.voteResults = voteUpdate;
-      this.render();
+
+      // 投票済み状態でチャートが既に存在する場合は、HTMLとチャートを更新
+      if (this.state === VoteComponentState.VOTED && this.chart) {
+        this.updateResultsDisplay();
+        setTimeout(() => this.renderChart(), 0);
+      } else {
+        this.render();
+      }
     }
   }
 
@@ -145,6 +165,22 @@ export abstract class BaseVoteComponent extends HTMLElement {
     }
   }
 
+  private requestVoteResult(): void {
+    if (webSocketService.getState() === WebSocketState.CONNECTED) {
+      webSocketService.requestVoteResult(this.voteKey);
+    }
+  }
+
+  protected updateResultsDisplay(): void {
+    if (!this.shadowRoot || !this.voteResults) return;
+
+    const { totalCount } = this.voteResults.data;
+    const titleElement = this.shadowRoot.querySelector('.results h3');
+    if (titleElement) {
+      titleElement.textContent = `投票結果 (総投票数: ${totalCount})`;
+    }
+  }
+
   protected render(): void {
     if (!this.shadowRoot) return;
 
@@ -180,6 +216,11 @@ export abstract class BaseVoteComponent extends HTMLElement {
 
     // イベントリスナーを設定
     this.setupEventListeners();
+
+    // Chart.jsの描画（結果表示時のみ）
+    if (this.state === VoteComponentState.VOTED && this.voteResults) {
+      setTimeout(() => this.renderChart(), 0);
+    }
   }
 
   protected renderConnecting(): string {
@@ -219,30 +260,12 @@ export abstract class BaseVoteComponent extends HTMLElement {
     }
 
     const { summary, totalCount } = this.voteResults.data;
-    const maxCount = Math.max(...Object.values(summary));
-
-    const resultsHtml = Object.entries(summary)
-      .sort(([,a], [,b]) => b - a)
-      .map(([content, count]) => {
-        const percentage = totalCount > 0 ? (count / totalCount * 100) : 0;
-        const barWidth = maxCount > 0 ? (count / maxCount * 100) : 0;
-
-        return `
-          <div class="result-item">
-            <div class="result-label">${this.escapeHtml(content)}</div>
-            <div class="result-bar">
-              <div class="result-fill" style="width: ${barWidth}%"></div>
-              <span class="result-count">${count}票 (${percentage.toFixed(1)}%)</span>
-            </div>
-          </div>
-        `;
-      }).join('');
 
     return `
       <div class="results">
         <h3>投票結果 (総投票数: ${totalCount})</h3>
-        <div class="results-list">
-          ${resultsHtml}
+        <div class="chart-container">
+          <canvas id="vote-chart" width="400" height="300"></canvas>
         </div>
       </div>
     `;
@@ -252,6 +275,92 @@ export abstract class BaseVoteComponent extends HTMLElement {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  private renderChart(): void {
+    if (!this.shadowRoot || !this.voteResults) return;
+
+    const canvas = this.shadowRoot.querySelector('#vote-chart') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    const { summary } = this.voteResults.data;
+    const entries = Object.entries(summary).sort(([,a], [,b]) => b - a);
+    const labels = entries.map(([content]) => content);
+    const data = entries.map(([,count]) => count);
+
+    // デフォルトの色パレット
+    const colors = [
+      '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+      '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'
+    ];
+
+    // 既存のチャートがある場合はデータを更新
+    if (this.chart) {
+      this.chart.data.labels = labels;
+      this.chart.data.datasets[0].data = data;
+
+      // 色を更新（棒グラフ・パイチャート共通）
+      this.chart.data.datasets[0].backgroundColor = this.chartType === 'pie'
+        ? colors.slice(0, data.length)
+        : colors.slice(0, data.length);
+      this.chart.data.datasets[0].borderColor = this.chartType === 'pie'
+        ? colors.slice(0, data.length)
+        : colors.slice(0, data.length);
+
+      // インクリメンタルアニメーションで更新
+      this.chart.update('active');
+      return;
+    }
+
+    // 初回作成時
+    const chartConfig: any = {
+      type: this.chartType === 'bar' ? 'bar' : 'pie',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: this.chartType === 'pie' ? colors.slice(0, data.length) : colors.slice(0, data.length),
+          borderColor: this.chartType === 'pie' ? colors.slice(0, data.length) : colors.slice(0, data.length),
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 750,
+          easing: 'easeOutQuart'
+        },
+        plugins: {
+          legend: {
+            display: this.chartType === 'pie',
+            position: 'bottom' as const
+          }
+        }
+      }
+    };
+
+    // 棒グラフの場合の追加設定（横向き）
+    if (this.chartType === 'bar') {
+      chartConfig.type = 'bar';
+      chartConfig.options.indexAxis = 'y'; // 横向きにする
+      chartConfig.options.scales = {
+        x: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1
+          }
+        },
+        y: {
+          ticks: {
+            maxRotation: 0,
+            minRotation: 0
+          }
+        }
+      };
+    }
+
+    this.chart = new Chart(canvas, chartConfig);
   }
 
   protected getStyles(): string {
@@ -398,6 +507,17 @@ export abstract class BaseVoteComponent extends HTMLElement {
 
       .option-item {
         margin-bottom: 8px;
+      }
+
+      .chart-container {
+        position: relative;
+        height: 300px;
+        margin-top: 16px;
+      }
+
+      #vote-chart {
+        max-width: 100%;
+        height: auto;
       }
     `;
   }

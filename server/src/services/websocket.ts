@@ -49,6 +49,16 @@ export class WebSocketService {
     }
   }
 
+  // 特定の接続に投票結果を送信
+  async sendVoteUpdateToConnection(event: any, connectionId: string, voteSummary: {key: string, summary: Record<string, number>, totalCount: number}): Promise<void> {
+    const message: VoteUpdateMessage = {
+      type: 'VOTE_UPDATE',
+      data: voteSummary,
+    };
+
+    await this.sendMessageToConnection(event, connectionId, message);
+  }
+
   // 全クライアントに投票結果をブロードキャスト
   async broadcastVoteUpdate(event: any, key: string): Promise<void> {
     try {

@@ -17,6 +17,9 @@
   ],
   "author": "Ryo Kamata",
   "license": "MIT",
+  "dependencies": {
+    "chart.js": "^4.4.0"
+  },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "ts-loader": "^9.0.0",

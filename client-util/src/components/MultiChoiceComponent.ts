@@ -64,12 +64,29 @@ export class MultiChoiceComponent extends BaseVoteComponent {
   }
 
   protected override renderResults(): string {
-    const baseResults = super.renderResults();
+    if (!this.voteResults) {
+      return `
+        <div class="results">
+          <h3>投票完了</h3>
+          <p>結果を集計中...</p>
+        </div>
+      `;
+    }
+
+    const { summary, totalCount } = this.voteResults.data;
+
+    let resultsHtml = `
+      <div class="results">
+        <h3>投票結果 (総投票数: ${totalCount})</h3>
+        <div class="chart-container">
+          <canvas id="vote-chart" width="400" height="300"></canvas>
+        </div>
+      </div>
+    `;
 
     // keep-activeが有効で、かつ選択肢がある場合は、投票フォームも表示
     if (this.keepActive && this.options.length > 0) {
-      return `
-        ${baseResults}
+      resultsHtml += `
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
         <div class="continue-voting">
           <h4>追加で投票する</h4>
@@ -78,8 +95,9 @@ export class MultiChoiceComponent extends BaseVoteComponent {
       `;
     }
 
-    return baseResults;
+    return resultsHtml;
   }
+
 
   protected setupEventListeners(): void {
     if (!this.shadowRoot) return;

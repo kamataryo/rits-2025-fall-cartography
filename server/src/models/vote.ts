@@ -21,6 +21,14 @@ export interface VoteMessage extends WebSocketMessage<{
   type: 'VOTE';
 }
 
+// 投票結果要求メッセージ（クライアント → サーバー）
+export interface RequestVoteResultMessage extends WebSocketMessage<{
+  key: string;
+}> {
+  action?: string;
+  type: 'REQUEST_VOTE_RESULT';
+}
+
 // 投票結果配信メッセージ（サーバー → クライアント）
 export interface VoteUpdateMessage extends WebSocketMessage<{
   key: string;

@@ -2,6 +2,7 @@ import {
   WebSocketState,
   VoteMessage,
   VoteUpdateMessage,
+  RequestVoteResultMessage,
   WebSocketServiceEvents
 } from '../types/index';
 
@@ -81,6 +82,28 @@ export class WebSocketService extends EventTarget {
       this.ws.send(JSON.stringify(message));
     } catch (error) {
       console.error('Failed to send vote:', error);
+      this.dispatchEvent(new CustomEvent('error', { detail: error }));
+    }
+  }
+
+  public requestVoteResult(voteKey: string): void {
+    if (this.state !== WebSocketState.CONNECTED || !this.ws) {
+      console.warn('WebSocket not connected. Cannot request vote result.');
+      return;
+    }
+
+    const message: RequestVoteResultMessage = {
+      action: 'vote',
+      type: 'REQUEST_VOTE_RESULT',
+      data: {
+        key: voteKey
+      }
+    };
+
+    try {
+      this.ws.send(JSON.stringify(message));
+    } catch (error) {
+      console.error('Failed to request vote result:', error);
       this.dispatchEvent(new CustomEvent('error', { detail: error }));
     }
   }
