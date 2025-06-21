@@ -69,67 +69,49 @@
     <div class="test-section">
         <h2>1. 自由テキスト投票</h2>
         <div class="description">
-            自由にテキストを入力して投票します。投票結果はリアルタイムでチャートに表示されます。
+            自由にテキストを入力して投票します。<code>freetext="on"</code> 属性を使用。
         </div>
-        <form is="vote-form" vote-key="test-free-text">
-            <div style="margin-bottom: 10px;">
-                <label for="content1">投票内容:</label><br>
-                <input type="text" name="content" id="content1" placeholder="自由に入力してください" style="width: 300px; padding: 5px;">
-            </div>
-            <button type="submit" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">投票する</button>
-        </form>
+        <vote-form vote-key="test-free-text" freetext="on"></vote-form>
     </div>
 
     <div class="test-section">
         <h2>2. 選択肢投票（ラジオボタン）</h2>
         <div class="description">
-            選択肢から1つを選んで投票します。
+            選択肢から1つを選んで投票します。<code>choices="選択肢1,選択肢2,..."</code> 属性を使用。
         </div>
-        <form is="vote-form" vote-key="test-radio-choice">
-            <div style="margin-bottom: 10px;">
-                <label>好きな色を選んでください:</label><br>
-                <input type="radio" name="choice" value="赤" id="red"> <label for="red">赤</label><br>
-                <input type="radio" name="choice" value="青" id="blue"> <label for="blue">青</label><br>
-                <input type="radio" name="choice" value="緑" id="green"> <label for="green">緑</label><br>
-                <input type="radio" name="choice" value="黄" id="yellow"> <label for="yellow">黄</label>
-            </div>
-            <button type="submit" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">投票する</button>
-        </form>
+        <vote-form vote-key="test-radio-choice" choices="赤,青,緑"></vote-form>
     </div>
 
     <div class="test-section">
-        <h2>3. 複数選択投票（チェックボックス）</h2>
+        <h2>3. プログラミング言語投票</h2>
         <div class="description">
-            複数の選択肢を選んで投票します。
+            好きなプログラミング言語を選んで投票します。
         </div>
-        <form is="vote-form" vote-key="test-checkbox-choice">
-            <div style="margin-bottom: 10px;">
-                <label>好きなプログラミング言語を選んでください（複数選択可）:</label><br>
-                <input type="checkbox" name="choices" value="JavaScript" id="js"> <label for="js">JavaScript</label><br>
-                <input type="checkbox" name="choices" value="Python" id="python"> <label for="python">Python</label><br>
-                <input type="checkbox" name="choices" value="Java" id="java"> <label for="java">Java</label><br>
-                <input type="checkbox" name="choices" value="TypeScript" id="ts"> <label for="ts">TypeScript</label><br>
-                <input type="checkbox" name="choices" value="Go" id="go"> <label for="go">Go</label>
-            </div>
-            <button type="submit" style="padding: 8px 16px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">投票する</button>
-        </form>
+        <vote-form vote-key="test-programming-lang" choices="JavaScript,Python,Java,TypeScript,Go,Rust"></vote-form>
     </div>
 
     <div class="test-section">
-        <h2>4. カスタムチャート付き投票</h2>
+        <h2>4. 混合投票（ラジオボタン + 自由テキスト）</h2>
         <div class="description">
-            事前にcanvas要素を配置した投票フォームです。
+            選択肢から選ぶか、自由にテキストを入力できます。<code>choices</code> と <code>freetext="on"</code> の両方を使用。
         </div>
-        <form is="vote-form" vote-key="test-custom-chart">
-            <div style="margin-bottom: 10px;">
-                <label for="content4">質問: 今日の気分はいかがですか？</label><br>
-                <input type="text" name="content" id="content4" placeholder="気分を入力してください" style="width: 300px; padding: 5px;">
-            </div>
-            <button type="submit" style="padding: 8px 16px; background: #6f42c1; color: white; border: none; border-radius: 4px; cursor: pointer;">投票する</button>
-            <div style="margin-top: 20px; height: 300px;">
-                <canvas id="custom-chart" style="max-width: 100%; max-height: 100%;"></canvas>
-            </div>
-        </form>
+        <vote-form vote-key="test-mixed" choices="とても良い,良い,普通,悪い" freetext="on"></vote-form>
+    </div>
+
+    <div class="test-section">
+        <h2>5. 授業評価投票</h2>
+        <div class="description">
+            授業の理解度について投票します。
+        </div>
+        <vote-form vote-key="test-class-evaluation" choices="完全に理解,だいたい理解,少し理解,全く理解できない"></vote-form>
+    </div>
+
+    <div class="test-section">
+        <h2>6. 属性なし（デフォルト）</h2>
+        <div class="description">
+            <code>choices</code> も <code>freetext</code> も指定しない場合（submitボタンのみ表示）
+        </div>
+        <vote-form vote-key="test-default"></vote-form>
     </div>
 
     <div class="test-section">
@@ -143,7 +125,12 @@
         </ol>
 
     <!-- クライアントライブラリを読み込み -->
-    <!-- <script src="https://g69ye6vo2a.execute-api.ap-northeast-1.amazonaws.com/v1//client/vote-client.min.js"></script> -->
+    <!-- <script src="https://g69ye6vo2a.execute-api.ap-northeast-1.amazonaws.com/v1/client/vote-client.min.js"></script> -->
     <script src="./dist/vote-client.js"></script>
+
+    <script>
+        // 新しい属性ベースの機能を使用するため、カスタムJavaScriptは不要
+        console.log('Vote Client Library loaded with new attribute-based features');
+    </script>
 </body>
 </html>

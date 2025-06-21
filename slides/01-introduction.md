@@ -6,6 +6,8 @@ paginate: true
 _html: true
 ---
 
+<script src="https://g69ye6vo2a.execute-api.ap-northeast-1.amazonaws.com/v1/client/vote-client.min.js"></script>
+
 <!-- _class: title -->
 
 # MapLibre GL JS と OpenStreetMap で始めるウェブカートグラフィ入門
@@ -46,7 +48,16 @@ MapLibre GL JS と OpenStreetMap で始めるウェブカートグラフィ入�
 
 ---
 
-## 地図とは何か？
+## スライド準備中
+
+- スライド準備中..
+- アンケート機能をつけたよ ...->
+
+---
+
+## プログラミング言語
+
+<vote-form vote-key="language" freetext="on" choices="C言語,JavaScript,Python,Ruby" />
 
 ---
 

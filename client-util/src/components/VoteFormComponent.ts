@@ -5,18 +5,22 @@ import { VoteUpdateMessage } from '../types/index';
 // Chart.js の全コンポーネントを登録
 Chart.register(...registerables);
 
-export class VoteFormComponent extends HTMLFormElement {
+export class VoteFormComponent extends HTMLElement {
   private chart: Chart | null = null;
   private voteKey: string = '';
   private chartCanvas: HTMLCanvasElement | null = null;
   private componentConnected: boolean = false;
+  private _shadowRoot: ShadowRoot;
+  private form: HTMLFormElement | null = null;
 
   static get observedAttributes(): string[] {
-    return ['vote-key'];
+    return ['vote-key', 'choices', 'freetext'];
   }
 
   constructor() {
     super();
+    this._shadowRoot = this.attachShadow({ mode: 'open' });
+    this.render();
   }
 
   connectedCallback(): void {
@@ -43,32 +47,259 @@ export class VoteFormComponent extends HTMLFormElement {
       this.voteKey = newValue;
       if (this.componentConnected) {
         this.requestCurrentVoteResult();
+        // チャートのタイトルを更新
+        if (this.chart) {
+          this.chart.options.plugins!.title!.text = `結果: ${this.voteKey}`;
+          this.chart.update();
+        }
+      }
+    } else if ((name === 'choices' || name === 'freetext') && oldValue !== newValue) {
+      if (this.componentConnected) {
+        this.updateFormContent();
       }
     }
   }
 
-  private setupForm(): void {
-    // フォーム送信イベントをリッスン
-    this.addEventListener('submit', this.handleSubmit.bind(this));
+  private generateFormContent(): string {
+    const choices = this.getAttribute('choices');
+    const freetext = this.getAttribute('freetext');
 
-    // スタイルを追加
-    this.style.display = 'block';
-    this.style.marginBottom = '20px';
+    let formContent = '';
+
+    // choices属性が設定されている場合、ラジオボタンを生成
+    if (choices && choices.trim()) {
+      const choiceList = choices.split(',').map(c => c.trim()).filter(c => c);
+      if (choiceList.length > 0) {
+        formContent += '<div class="form-group"><div class="radio-group">';
+
+        choiceList.forEach((choice, index) => {
+          const choiceId = `choice-${index}`;
+          formContent += `
+            <div class="radio-item">
+              <input type="radio" id="${choiceId}" name="choice" value="${choice}">
+              <label for="${choiceId}">${choice}</label>
+            </div>
+          `;
+        });
+
+        formContent += '</div></div>';
+      }
+    }
+
+    // freetext="on"が設定されている場合、ラジオボタン付きテキスト入力を追加
+    if (freetext === 'on') {
+      formContent += `
+        <div class="form-group free-input-group">
+          <div class="radio-item">
+            <input type="radio" id="freetext-radio" name="choice" value="">
+            <input type="text" id="freetext-input" placeholder="自由記述で入力">
+          </div>
+        </div>
+      `;
+    }
+
+    return formContent;
+  }
+
+  private updateFormContent(): void {
+    if (!this.form) return;
+
+    // 既存のフォーム内容をクリア（submitボタン以外）
+    const submitButtonGroup = this.form.querySelector('.form-group:has(button[type="submit"])');
+    this.form.innerHTML = '';
+
+    // 動的に生成されたフォーム内容を追加
+    const dynamicContent = this.generateFormContent();
+    if (dynamicContent) {
+      this.form.innerHTML = dynamicContent;
+      const freeTextInput = this.form.querySelector<HTMLInputElement>('#freetext-input');
+      const radioInput = this.form.querySelector<HTMLInputElement>('#freetext-radio');
+      freeTextInput?.addEventListener('focus', (event) => {
+        if(radioInput) {
+            radioInput.checked = true; // ラジオボタンの値を更新
+          }
+        })
+      freeTextInput?.addEventListener('change', (event) => {
+        const text = (event.target as HTMLInputElement).value.trim();
+        if(radioInput) {
+          radioInput.value = text
+        }
+      })
+    }
+
+    // submitボタンを最後に追加
+    const submitGroup = document.createElement('div');
+    submitGroup.className = 'form-group';
+    submitGroup.innerHTML = '<button type="submit" class="form-submit-group">送信する</button>';
+    this.form.appendChild(submitGroup);
+
+    // フォーム送信イベントを再設定
+    this.form.addEventListener('submit', this.handleSubmit.bind(this));
+  }
+
+  private render(): void {
+    this._shadowRoot.innerHTML = `
+      <style>
+        :host {
+          display: block;
+          margin-bottom: 20px;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          font-size: 14px;
+        }
+
+        .vote-container {
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          padding: 20px;
+          background: #fff;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          // display: flex;
+        }
+
+        .vote-form {
+          margin-bottom: 20px;
+        }
+
+        .form-group:last-child {
+          margin-bottom: 15px;
+        }
+        .form-submit-group {
+          margin-top: 15px;
+        }
+        .free-input-group:not(:first-child) {
+          margin-top: 8px;
+        }
+
+        label {
+          display: block;
+          margin-bottom: 5px;
+          font-weight: 500;
+          color: #333;
+        }
+
+        input[type="text"], textarea {
+          width: 100%;
+          padding: 8px 12px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          font-size: 14px;
+          box-sizing: border-box;
+        }
+
+        input[type="radio"], input[type="checkbox"] {
+          margin-right: 8px;
+        }
+
+        .radio-group, .checkbox-group {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .radio-item, .checkbox-item {
+          display: flex;
+          align-items: center;
+        }
+
+        button {
+          background-color: #007bff;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 500;
+        }
+
+        button:hover {
+          background-color: #0056b3;
+        }
+
+        button:disabled {
+          background-color: #6c757d;
+          cursor: not-allowed;
+        }
+
+        .chart-container {
+          margin-top: 20px;
+          position: relative;
+          height: 300px;
+        }
+
+        canvas {
+          max-width: 100%;
+          max-height: 100%;
+        }
+
+        .vote-message {
+          padding: 8px 12px;
+          margin: 10px 0;
+          border-radius: 4px;
+          font-size: 14px;
+        }
+
+        .vote-message-success {
+          background-color: #d4edda;
+          color: #155724;
+          border: 1px solid #c3e6cb;
+        }
+
+        .vote-message-error {
+          background-color: #f8d7da;
+          color: #721c24;
+          border: 1px solid #f5c6cb;
+        }
+
+        .connection-status {
+          font-size: 12px;
+          padding: 4px 8px;
+          border-radius: 4px;
+          margin-bottom: 10px;
+        }
+
+        .connection-connected {
+          // background-color: #d1ecf1;
+          // color: #0c5460;
+          // border: 1px solid #bee5eb;
+          display: none;
+        }
+
+        .connection-disconnected {
+          background-color: #f8d7da;
+          color: #721c24;
+          border: 1px solid #f5c6cb;
+        }
+      </style>
+
+      <div class="vote-container">
+        <div class="connection-status" id="connection-status">接続中...</div>
+
+        <form class="vote-form" id="vote-form">
+          <div class="form-submit-group">
+            <button type="submit">送信する</button>
+          </div>
+        </form>
+
+        <div class="chart-container">
+          <canvas id="chart"></canvas>
+        </div>
+      </div>
+    `;
+
+    this.form = this._shadowRoot.querySelector('#vote-form');
+    this.chartCanvas = this._shadowRoot.querySelector('#chart');
+  }
+
+  private setupForm(): void {
+    if (!this.form) return;
+
+    // 動的フォーム内容を生成
+    this.updateFormContent();
   }
 
   private setupChart(): void {
-    alert(1)
-    // 既存のcanvas要素を検索
-    this.chartCanvas = this.querySelector('canvas');
-
-    // canvas要素が見つからない場合は作成
-    if (!this.chartCanvas) {
-      this.chartCanvas = document.createElement('canvas');
-      this.chartCanvas.id = `chart-${this.voteKey}`;
-      this.chartCanvas.style.maxWidth = '100%';
-      this.chartCanvas.style.maxHeight = '400px';
-      this.appendChild(this.chartCanvas);
-    }
+    if (!this.chartCanvas) return;
 
     this.createChart();
   }
@@ -85,32 +316,33 @@ export class VoteFormComponent extends HTMLFormElement {
           data: [],
           backgroundColor: [
             'rgba(54, 162, 235, 0.8)',
-            'rgba(255, 99, 132, 0.8)',
-            'rgba(255, 205, 86, 0.8)',
-            'rgba(75, 192, 192, 0.8)',
-            'rgba(153, 102, 255, 0.8)',
-            'rgba(255, 159, 64, 0.8)',
-            'rgba(199, 199, 199, 0.8)',
-            'rgba(83, 102, 255, 0.8)'
+            // 'rgba(255, 99, 132, 0.8)',
+            // 'rgba(255, 205, 86, 0.8)',
+            // 'rgba(75, 192, 192, 0.8)',
+            // 'rgba(153, 102, 255, 0.8)',
+            // 'rgba(255, 159, 64, 0.8)',
+            // 'rgba(199, 199, 199, 0.8)',
+            // 'rgba(83, 102, 255, 0.8)'
           ],
           borderColor: [
             'rgba(54, 162, 235, 1)',
-            'rgba(255, 99, 132, 1)',
-            'rgba(255, 205, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)',
-            'rgba(199, 199, 199, 1)',
-            'rgba(83, 102, 255, 1)'
+            // 'rgba(255, 99, 132, 1)',
+            // 'rgba(255, 205, 86, 1)',
+            // 'rgba(75, 192, 192, 1)',
+            // 'rgba(153, 102, 255, 1)',
+            // 'rgba(255, 159, 64, 1)',
+            // 'rgba(199, 199, 199, 1)',
+            // 'rgba(83, 102, 255, 1)'
           ],
           borderWidth: 1
         }]
       },
       options: {
+        indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
         scales: {
-          y: {
+          x: {
             beginAtZero: true,
             ticks: {
               stepSize: 1
@@ -118,10 +350,10 @@ export class VoteFormComponent extends HTMLFormElement {
           }
         },
         plugins: {
-          title: {
-            display: true,
-            text: `投票結果: ${this.voteKey}`
-          },
+          // title: {
+          //   display: true,
+          //   text: `結果: ${this.voteKey}`
+          // },
           legend: {
             display: false
           }
@@ -159,9 +391,18 @@ export class VoteFormComponent extends HTMLFormElement {
 
   private handleConnectionStateChange(event: CustomEvent): void {
     const state = event.detail;
-    if (state === 'connected') {
-      // 接続が確立されたら現在の投票結果を要求
-      this.requestCurrentVoteResult();
+    const statusElement = this._shadowRoot.querySelector('#connection-status');
+
+    if (statusElement) {
+      if (state === 'connected') {
+        statusElement.textContent = '接続済み';
+        statusElement.className = 'connection-status connection-connected';
+        // 接続が確立されたら現在の投票結果を要求
+        this.requestCurrentVoteResult();
+      } else {
+        statusElement.textContent = '接続中...';
+        statusElement.className = 'connection-status connection-disconnected';
+      }
     }
   }
 
@@ -173,25 +414,15 @@ export class VoteFormComponent extends HTMLFormElement {
       return;
     }
 
-    const formData = new FormData(this);
+    if (!this.form) return;
+
+    const formData = new FormData(this.form);
     let content = '';
 
-    // 自由テキスト入力を取得
-    const textInput = formData.get('content') as string;
-    if (textInput && textInput.trim()) {
-      content = textInput.trim();
-    }
-
-    // ラジオボタンの選択を取得
-    const radioValue = formData.get('choice') as string;
-    if (radioValue) {
-      content = radioValue;
-    }
-
-    // チェックボックスの選択を取得（複数選択の場合）
-    const checkboxValues = formData.getAll('choices') as string[];
-    if (checkboxValues.length > 0) {
-      content = checkboxValues.join(', ');
+    // ラジオボタンまたはテキスト入力の選択を取得（name="choice"）
+    const choiceValue = formData.get('choice') as string;
+    if (choiceValue && choiceValue.trim()) {
+      content = choiceValue.trim();
     }
 
     if (!content) {
@@ -203,10 +434,10 @@ export class VoteFormComponent extends HTMLFormElement {
     webSocketService.sendVote(this.voteKey, content);
 
     // フォームをリセット
-    this.reset();
+    this.form.reset();
 
     // 送信完了メッセージ
-    this.showMessage('投票を送信しました', 'success');
+    // this.showMessage('送信しました', 'success');
   }
 
   private handleVoteUpdate(event: CustomEvent): void {
@@ -241,7 +472,7 @@ export class VoteFormComponent extends HTMLFormElement {
 
   private showMessage(text: string, type: 'success' | 'error' = 'success'): void {
     // 既存のメッセージを削除
-    const existingMessage = this.querySelector('.vote-message');
+    const existingMessage = this._shadowRoot.querySelector('.vote-message');
     if (existingMessage) {
       existingMessage.remove();
     }
@@ -250,19 +481,12 @@ export class VoteFormComponent extends HTMLFormElement {
     const messageElement = document.createElement('div');
     messageElement.className = `vote-message vote-message-${type}`;
     messageElement.textContent = text;
-    messageElement.style.cssText = `
-      padding: 8px 12px;
-      margin: 10px 0;
-      border-radius: 4px;
-      font-size: 14px;
-      ${type === 'success'
-        ? 'background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;'
-        : 'background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;'
-      }
-    `;
 
-    // フォームの最初に挿入
-    this.insertBefore(messageElement, this.firstChild);
+    // フォームの前に挿入
+    const form = this._shadowRoot.querySelector('.vote-form');
+    if (form && form.parentNode) {
+      form.parentNode.insertBefore(messageElement, form);
+    }
 
     // 3秒後に自動削除
     setTimeout(() => {
@@ -277,12 +501,8 @@ export class VoteFormComponent extends HTMLFormElement {
       this.chart.destroy();
       this.chart = null;
     }
-
-    // イベントリスナーを削除（実際の削除は困難なため、コンポーネントの状態で制御）
-    // webSocketService.removeEventListener('connection-state-changed', this.handleConnectionStateChange.bind(this));
-    // webSocketService.removeEventListener('vote-update', this.handleVoteUpdate.bind(this));
   }
 }
 
-// カスタム要素として登録
-customElements.define('vote-form', VoteFormComponent, { extends: 'form' });
+// カスタム要素として登録（Autonomous Custom Elements）
+customElements.define('vote-form', VoteFormComponent);
