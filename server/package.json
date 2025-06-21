@@ -1,0 +1,39 @@
+{
+  "name": "voting-system-server",
+  "version": "1.0.0",
+  "description": "WebSocket-based voting system for classroom slides",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "deploy": "serverless deploy",
+    "remove": "serverless remove",
+    "logs": "serverless logs -f vote -t"
+  },
+  "keywords": [
+    "websocket",
+    "voting",
+    "serverless",
+    "aws",
+    "lambda",
+    "dynamodb"
+  ],
+  "author": "kamataryo (ryo@kamataworks.com)",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.490.0",
+    "@aws-sdk/client-apigatewaymanagementapi": "^3.490.0",
+    "@aws-sdk/util-dynamodb": "^3.490.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "serverless": "^3.38.0",
+    "serverless-plugin-typescript": "^2.1.5",
+    "typescript": "^5.3.3",
+    "@types/aws-lambda": "^8.10.131",
+    "@types/uuid": "^9.0.7",
+    "@types/node": "^20.10.6"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
