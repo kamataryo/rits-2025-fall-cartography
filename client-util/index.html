@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote Client Library Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .test-section {
+            margin: 40px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+
+        .test-section h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .description {
+            color: #666;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .status.connecting {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        code {
+            background: #f1f1f1;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Vote Client Library Test</h1>
+
+    <div id="connection-status" class="status connecting">
+        WebSocket接続状態: 接続中...
+    </div>
+
+    <p>このページは投票クライアントライブラリのテスト用です。</p>
+
+    <div class="test-section">
+        <h2>1. 単一選択式（選択肢あり）</h2>
+        <div class="description">
+            ラジオボタンで選択肢から1つを選んで投票します。
+        </div>
+        <single-choice
+            vote-key="test-single-choice-options"
+            options='["選択肢A", "選択肢B", "選択肢C"]'>
+        </single-choice>
+    </div>
+
+    <div class="test-section">
+        <h2>2. 単一選択式（フリーテキストのみ）</h2>
+        <div class="description">
+            テキストエリアに自由に入力して投票します。
+        </div>
+        <single-choice
+            vote-key="test-single-choice-freetext">
+        </single-choice>
+    </div>
+
+    <div class="test-section">
+        <h2>3. 単一選択式（選択肢 + その他）</h2>
+        <div class="description">
+            選択肢から選ぶか、「その他」を選んでテキスト入力できます。
+        </div>
+        <single-choice
+            vote-key="test-single-choice-with-other"
+            options='["選択肢A", "選択肢B", "その他"]'>
+        </single-choice>
+    </div>
+
+    <div class="test-section">
+        <h2>4. 複数選択式（選択肢あり）</h2>
+        <div class="description">
+            チェックボックスで複数の選択肢を選んで投票します。
+        </div>
+        <multi-choice
+            vote-key="test-multi-choice-options"
+            options='["選択肢A", "選択肢B", "選択肢C", "選択肢D"]'>
+        </multi-choice>
+    </div>
+
+    <div class="test-section">
+        <h2>5. 複数選択式（フリーテキストのみ）</h2>
+        <div class="description">
+            テキストエリアに入力して、複数回投票できます。
+        </div>
+        <multi-choice
+            vote-key="test-multi-choice-freetext">
+        </multi-choice>
+    </div>
+
+    <div class="test-section">
+        <h2>6. 複数選択式（継続投票可能）</h2>
+        <div class="description">
+            <code>keep-active="true"</code> により、投票後も継続して投票できます。
+        </div>
+        <multi-choice
+            vote-key="test-multi-choice-keep-active"
+            options='["選択肢A", "選択肢B", "選択肢C"]'
+            keep-active="true">
+        </multi-choice>
+    </div>
+
+    <div class="test-section">
+        <h2>7. 複数選択式（選択肢 + その他）</h2>
+        <div class="description">
+            複数の選択肢を選び、「その他」でテキスト入力も可能です。
+        </div>
+        <multi-choice
+            vote-key="test-multi-choice-with-other"
+            options='["選択肢A", "選択肢B", "その他"]'>
+        </multi-choice>
+    </div>
+
+    <div class="test-section">
+        <h2>使用方法</h2>
+        <ol>
+            <li>WebSocketサーバーがデプロイされていることを確認</li>
+            <li>ブラウザの開発者ツールでコンソールを開く</li>
+            <li>各コンポーネントで投票を試す</li>
+            <li>リアルタイムで結果が更新されることを確認</li>
+            <li>複数のブラウザタブで開いて、ブロードキャスト機能を確認</li>
+        </ol>
+    </div>
+
+    <!-- クライアントライブラリを読み込み -->
+    <script src="https://g69ye6vo2a.execute-api.ap-northeast-1.amazonaws.com/v1/client/vote-client.js"></script>
+
+    <!-- 接続状態の監視 -->
+    <script>
+        // WebSocket接続状態の監視
+        if (typeof VoteClient !== 'undefined') {
+            const statusElement = document.getElementById('connection-status');
+
+            VoteClient.webSocketService.addEventListener('connection-state-changed', (event) => {
+                const state = event.detail;
+                statusElement.className = 'status ' + state;
+
+                switch (state) {
+                    case 'connecting':
+                        statusElement.textContent = 'WebSocket接続状態: 接続中...';
+                        break;
+                    case 'connected':
+                        statusElement.textContent = 'WebSocket接続状態: 接続済み ✅';
+                        break;
+                    case 'disconnected':
+                        statusElement.textContent = 'WebSocket接続状態: 切断されました';
+                        break;
+                    case 'error':
+                        statusElement.textContent = 'WebSocket接続状態: エラーが発生しました ❌';
+                        break;
+                }
+            });
+
+            // 投票結果の監視（デバッグ用）
+            VoteClient.webSocketService.addEventListener('vote-update', (event) => {
+                console.log('Vote update received:', event.detail);
+            });
+        } else {
+            document.getElementById('connection-status').innerHTML =
+                '<span class="status error">❌ VoteClient ライブラリが読み込まれていません</span>';
+        }
+    </script>
+</body>
+</html>

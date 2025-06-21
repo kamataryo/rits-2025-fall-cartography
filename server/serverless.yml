@@ -31,8 +31,9 @@ provider:
           Resource:
             - "arn:aws:execute-api:${self:provider.region}:*:*/@connections/*"
 
-plugins:
-  - serverless-plugin-typescript
+package:
+  patterns:
+    - src/vote-client.min.js
 
 functions:
   connect:
@@ -54,6 +55,14 @@ functions:
     events:
       - websocket:
           route: vote
+          cors: true
+
+  serveClient:
+    handler: src/handlers/serve-client.handler
+    events:
+      - http:
+          path: client/vote-client.js
+          method: get
           cors: true
 
 resources:

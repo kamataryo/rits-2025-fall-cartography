@@ -355,6 +355,123 @@ aws logs describe-log-groups --log-group-name-prefix "/aws/lambda/voting-system"
 aws logs get-log-events --log-group-name "/aws/lambda/voting-system-dev-vote" --log-stream-name [stream-name]
 ```
 
+## 🎯 クライアントライブラリ
+
+### 概要
+授業スライド用のWebComponentベース投票クライアントライブラリです。
+
+### 使用方法
+
+#### 1. ライブラリの読み込み
+```html
+<script src="https://[api-id].execute-api.ap-northeast-1.amazonaws.com/[stage]/client/vote-client.js"></script>
+```
+
+#### 2. WebComponentの配置
+
+##### 単一選択式
+```html
+<!-- 選択肢あり -->
+<single-choice 
+  vote-key="lecture-01-q1"
+  options='["選択肢A", "選択肢B", "選択肢C"]'>
+</single-choice>
+
+<!-- フリーテキストのみ -->
+<single-choice 
+  vote-key="lecture-01-q2">
+</single-choice>
+
+<!-- 選択肢 + その他 -->
+<single-choice 
+  vote-key="lecture-01-q3"
+  options='["選択肢A", "選択肢B", "その他"]'>
+</single-choice>
+```
+
+##### 複数選択式
+```html
+<!-- 選択肢あり -->
+<multi-choice 
+  vote-key="lecture-01-q4"
+  options='["選択肢A", "選択肢B", "選択肢C"]'>
+</multi-choice>
+
+<!-- フリーテキストのみ -->
+<multi-choice 
+  vote-key="lecture-01-q5">
+</multi-choice>
+
+<!-- 継続投票可能 -->
+<multi-choice 
+  vote-key="lecture-01-q6"
+  options='["選択肢A", "選択肢B", "選択肢C"]'
+  keep-active="true">
+</multi-choice>
+```
+
+### 属性
+
+#### `<single-choice>` 属性
+| 属性 | 必須 | デフォルト | 説明 |
+|------|------|-----------|------|
+| `vote-key` | ✅ | - | 投票識別キー |
+| `options` | ❌ | `[]` | 選択肢配列。空配列または未指定でフリーテキストのみ |
+
+#### `<multi-choice>` 属性
+| 属性 | 必須 | デフォルト | 説明 |
+|------|------|-----------|------|
+| `vote-key` | ✅ | - | 投票識別キー |
+| `options` | ❌ | `[]` | 選択肢配列。空配列または未指定でフリーテキストのみ |
+| `keep-active` | ❌ | `false` | 投票後もフォームを維持するか |
+
+### 動作仕様
+
+- **自動接続**: コンポーネント初期化時にWebSocket自動接続
+- **リアルタイム更新**: 500ms間隔でスロットリング処理
+- **状態管理**: LocalStorageで投票済み状態を記憶
+- **結果表示**: 投票後に同一コンポーネント内で結果表示
+- **複数選択**: 選択項目ごとに連続でVOTEメッセージ送信
+
+### 高度な使用方法
+
+#### WebSocket URLの手動設定
+```javascript
+// ライブラリ読み込み後
+VoteClient.setWebSocketUrl('wss://your-custom-websocket-url');
+```
+
+#### 接続状態の監視
+```javascript
+VoteClient.webSocketService.addEventListener('connection-state-changed', (event) => {
+  console.log('WebSocket state:', event.detail);
+});
+```
+
+### クライアントライブラリのビルド
+
+#### 開発環境セットアップ
+```bash
+cd server/src/client-util
+npm install
+```
+
+#### ビルド
+```bash
+# 本番用ビルド
+npm run build
+
+# 開発用ビルド（監視モード）
+npm run dev
+
+# 型チェックのみ
+npm run type-check
+```
+
+#### ビルド成果物
+- `dist/vote-client.js` - 単一JSファイル（CDN配信用）
+- `dist/index.d.ts` - TypeScript型定義ファイル
+
 ## 📄 ライセンス
 
 MIT License

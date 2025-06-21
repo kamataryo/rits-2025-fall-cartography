@@ -1,0 +1,31 @@
+{
+  "name": "vote-client",
+  "version": "1.0.0",
+  "description": "WebComponent-based voting client library",
+  "main": "dist/vote-client.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development --watch",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "voting",
+    "webcomponent",
+    "websocket",
+    "realtime"
+  ],
+  "author": "Ryo Kamata",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-loader": "^9.0.0",
+    "typescript": "^5.8.3",
+    "webpack": "^5.0.0",
+    "webpack-cli": "^5.0.0"
+  },
+  "browserslist": [
+    "defaults",
+    "not IE 11"
+  ]
+}
