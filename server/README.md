@@ -401,13 +401,6 @@ aws logs get-log-events --log-group-name "/aws/lambda/voting-system-dev-vote" --
 <multi-choice 
   vote-key="lecture-01-q5">
 </multi-choice>
-
-<!-- 継続投票可能 -->
-<multi-choice 
-  vote-key="lecture-01-q6"
-  options='["選択肢A", "選択肢B", "選択肢C"]'
-  keep-active="true">
-</multi-choice>
 ```
 
 ### 属性
@@ -423,7 +416,6 @@ aws logs get-log-events --log-group-name "/aws/lambda/voting-system-dev-vote" --
 |------|------|-----------|------|
 | `vote-key` | ✅ | - | 投票識別キー |
 | `options` | ❌ | `[]` | 選択肢配列。空配列または未指定でフリーテキストのみ |
-| `keep-active` | ❌ | `false` | 投票後もフォームを維持するか |
 
 ### 動作仕様
 

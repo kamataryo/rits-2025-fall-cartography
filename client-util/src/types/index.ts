@@ -49,7 +49,7 @@ export enum WebSocketState {
 }
 
 // コンポーネント共通プロパティ
-export interface BaseVoteComponentProps {
+interface BaseVoteComponentProps {
   voteKey: string;
   options: string[];
 }
@@ -65,11 +65,4 @@ export interface VoteRecord {
   voteKey: string;
   voteIds: string[];  // content[] から変更
   timestamp: number;
-}
-
-// WebSocketサービスのイベント
-export interface WebSocketServiceEvents {
-  'connection-state-changed': WebSocketState;
-  'vote-update': VoteUpdateMessage;
-  'error': Error;
 }

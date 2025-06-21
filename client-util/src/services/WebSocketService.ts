@@ -3,7 +3,6 @@ import {
   VoteMessage,
   VoteUpdateMessage,
   RequestVoteResultMessage,
-  WebSocketServiceEvents
 } from '../types/index';
 
 // @ts-ignore
