@@ -364,7 +364,7 @@ aws logs get-log-events --log-group-name "/aws/lambda/voting-system-dev-vote" --
 
 #### 1. ライブラリの読み込み
 ```html
-<script src="https://[api-id].execute-api.ap-northeast-1.amazonaws.com/[stage]/client/vote-client.js"></script>
+<script src="https://[api-id].execute-api.ap-northeast-1.amazonaws.com/[stage]//client/vote-client.min.js"></script>
 ```
 
 #### 2. WebComponentの配置

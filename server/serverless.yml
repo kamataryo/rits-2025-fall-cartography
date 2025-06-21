@@ -61,7 +61,7 @@ functions:
     handler: src/handlers/serve-client.handler
     events:
       - http:
-          path: client/vote-client.js
+          path: /client/vote-client.min.js
           method: get
           cors: true
 

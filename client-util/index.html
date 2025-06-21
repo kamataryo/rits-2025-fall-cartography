@@ -64,22 +64,72 @@
 </head>
 <body>
     <h1>Vote Client Library Test</h1>
-
-    <div id="connection-status" class="status connecting">
-        WebSocket接続状態: 接続中...
-    </div>
-
     <p>このページは投票クライアントライブラリのテスト用です。</p>
 
     <div class="test-section">
-        <h2>1. 単一選択式（選択肢あり）</h2>
+        <h2>1. 自由テキスト投票</h2>
         <div class="description">
-            ラジオボタンで選択肢から1つを選んで投票します。
+            自由にテキストを入力して投票します。投票結果はリアルタイムでチャートに表示されます。
         </div>
-        <single-choice
-            vote-key="test-single-choice-options"
-            options='["選択肢A", "選択肢B", "選択肢C"]'>
-        </single-choice>
+        <form is="vote-form" vote-key="test-free-text">
+            <div style="margin-bottom: 10px;">
+                <label for="content1">投票内容:</label><br>
+                <input type="text" name="content" id="content1" placeholder="自由に入力してください" style="width: 300px; padding: 5px;">
+            </div>
+            <button type="submit" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">投票する</button>
+        </form>
+    </div>
+
+    <div class="test-section">
+        <h2>2. 選択肢投票（ラジオボタン）</h2>
+        <div class="description">
+            選択肢から1つを選んで投票します。
+        </div>
+        <form is="vote-form" vote-key="test-radio-choice">
+            <div style="margin-bottom: 10px;">
+                <label>好きな色を選んでください:</label><br>
+                <input type="radio" name="choice" value="赤" id="red"> <label for="red">赤</label><br>
+                <input type="radio" name="choice" value="青" id="blue"> <label for="blue">青</label><br>
+                <input type="radio" name="choice" value="緑" id="green"> <label for="green">緑</label><br>
+                <input type="radio" name="choice" value="黄" id="yellow"> <label for="yellow">黄</label>
+            </div>
+            <button type="submit" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">投票する</button>
+        </form>
+    </div>
+
+    <div class="test-section">
+        <h2>3. 複数選択投票（チェックボックス）</h2>
+        <div class="description">
+            複数の選択肢を選んで投票します。
+        </div>
+        <form is="vote-form" vote-key="test-checkbox-choice">
+            <div style="margin-bottom: 10px;">
+                <label>好きなプログラミング言語を選んでください（複数選択可）:</label><br>
+                <input type="checkbox" name="choices" value="JavaScript" id="js"> <label for="js">JavaScript</label><br>
+                <input type="checkbox" name="choices" value="Python" id="python"> <label for="python">Python</label><br>
+                <input type="checkbox" name="choices" value="Java" id="java"> <label for="java">Java</label><br>
+                <input type="checkbox" name="choices" value="TypeScript" id="ts"> <label for="ts">TypeScript</label><br>
+                <input type="checkbox" name="choices" value="Go" id="go"> <label for="go">Go</label>
+            </div>
+            <button type="submit" style="padding: 8px 16px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">投票する</button>
+        </form>
+    </div>
+
+    <div class="test-section">
+        <h2>4. カスタムチャート付き投票</h2>
+        <div class="description">
+            事前にcanvas要素を配置した投票フォームです。
+        </div>
+        <form is="vote-form" vote-key="test-custom-chart">
+            <div style="margin-bottom: 10px;">
+                <label for="content4">質問: 今日の気分はいかがですか？</label><br>
+                <input type="text" name="content" id="content4" placeholder="気分を入力してください" style="width: 300px; padding: 5px;">
+            </div>
+            <button type="submit" style="padding: 8px 16px; background: #6f42c1; color: white; border: none; border-radius: 4px; cursor: pointer;">投票する</button>
+            <div style="margin-top: 20px; height: 300px;">
+                <canvas id="custom-chart" style="max-width: 100%; max-height: 100%;"></canvas>
+            </div>
+        </form>
     </div>
 
     <div class="test-section">
@@ -87,49 +137,13 @@
         <ol>
             <li>WebSocketサーバーがデプロイされていることを確認</li>
             <li>ブラウザの開発者ツールでコンソールを開く</li>
-            <li>各コンポーネントで投票を試す</li>
-            <li>リアルタイムで結果が更新されることを確認</li>
+            <li>各フォームで投票を試す</li>
+            <li>リアルタイムでチャートが更新されることを確認</li>
             <li>複数のブラウザタブで開いて、ブロードキャスト機能を確認</li>
         </ol>
-    </div>
 
     <!-- クライアントライブラリを読み込み -->
-    <!-- <script src="https://g69ye6vo2a.execute-api.ap-northeast-1.amazonaws.com/v1/client/vote-client.js"></script> -->
+    <!-- <script src="https://g69ye6vo2a.execute-api.ap-northeast-1.amazonaws.com/v1//client/vote-client.min.js"></script> -->
     <script src="./dist/vote-client.js"></script>
-    <!-- 接続状態の監視 -->
-    <script>
-        // WebSocket接続状態の監視
-        if (typeof VoteClient !== 'undefined') {
-            const statusElement = document.getElementById('connection-status');
-
-            VoteClient.webSocketService.addEventListener('connection-state-changed', (event) => {
-                const state = event.detail;
-                statusElement.className = 'status ' + state;
-
-                switch (state) {
-                    case 'connecting':
-                        statusElement.textContent = 'WebSocket接続状態: 接続中...';
-                        break;
-                    case 'connected':
-                        statusElement.textContent = 'WebSocket接続状態: 接続済み ✅';
-                        break;
-                    case 'disconnected':
-                        statusElement.textContent = 'WebSocket接続状態: 切断されました';
-                        break;
-                    case 'error':
-                        statusElement.textContent = 'WebSocket接続状態: エラーが発生しました ❌';
-                        break;
-                }
-            });
-
-            // 投票結果の監視（デバッグ用）
-            VoteClient.webSocketService.addEventListener('vote-update', (event) => {
-                console.log('Vote update received:', event.detail);
-            });
-        } else {
-            document.getElementById('connection-status').innerHTML =
-                '<span class="status error">❌ VoteClient ライブラリが読み込まれていません</span>';
-        }
-    </script>
 </body>
 </html>
