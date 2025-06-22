@@ -57,7 +57,7 @@ export class ReactionComponent extends HTMLElement {
     style.textContent = `
       .flying-emoji {
         position: fixed;
-        font-size: 24px;
+        font-size: 48px;
         pointer-events: none;
         z-index: 1001;
         user-select: none;
@@ -65,23 +65,33 @@ export class ReactionComponent extends HTMLElement {
       }
 
       @keyframes flyUp {
-        0% {
-          transform: translateY(0) scale(1);
-          opacity: 1;
-        }
-        50% {
-          transform: translateY(-100px) scale(1.2);
-          opacity: 0.8;
-        }
-        100% {
-          transform: translateY(-200px) scale(0.8);
-          opacity: 0;
-        }
+      0% {
+        offset-distance: 0%;
+        opacity: 1;
+        transform: scale(1);
+      }
+      100% {
+        offset-distance: 100%;
+        opacity: 0;
+      }
       }
 
-      .flying-emoji.animate {
-        animation: flyUp 2s ease-out forwards;
+      .flying-emoji.animate1 {
+        animation: flyUp 3s ease-out forwards;
+        offset-path: path("M 0 0 C -50 -200, 50 -400, 0 -600");
+        offset-rotate: 0deg;
+        offset-distance: 0%;
+        opacity: 1;
       }
+
+      .flying-emoji.animate2 {
+        animation: flyUp 3s ease-out forwards;
+        offset-path: path("M 0 0 C 50 -200, -50 -400, 0 -600");
+        offset-rotate: 0deg;
+        offset-distance: 0%;
+        opacity: 1;
+      }
+
     `;
 
     document.head.appendChild(style);
@@ -367,14 +377,15 @@ export class ReactionComponent extends HTMLElement {
     if (!mainButton) return;
 
     const rect = mainButton.getBoundingClientRect();
-    flyingEmoji.style.left = `${rect.left + rect.width / 2}px`;
-    flyingEmoji.style.top = `${rect.top + rect.height / 2}px`;
+    flyingEmoji.style.left = `${10 - Math.random() * 10 + rect.left + rect.width / 2}px`;
+    flyingEmoji.style.top = `${10 - Math.random() * 10 + rect.top + rect.height / 2}px`;
 
     document.body.appendChild(flyingEmoji);
 
     // より確実なタイミングでアニメーション開始
     setTimeout(() => {
-      flyingEmoji.classList.add('animate');
+      const animateClassName = Math.random() > 0.5 ? 'animate1' : 'animate2'
+      flyingEmoji.classList.add(animateClassName);
     }, 10); // 10ms の遅延
 
     // アニメーション終了後に削除
@@ -382,7 +393,7 @@ export class ReactionComponent extends HTMLElement {
       if (flyingEmoji.parentNode) {
         flyingEmoji.parentNode.removeChild(flyingEmoji);
       }
-    }, 2000);
+    }, 3000);
   }
 
   private setupWebSocket(): void {
@@ -410,7 +421,7 @@ export class ReactionComponent extends HTMLElement {
     flyingEmoji.textContent = emoji;
 
     // ランダムな位置から開始
-    const startX = Math.random() * (window.innerWidth - 100) + 50;
+    const startX = window.innerWidth + Math.random() * 20 - 20 - 50;
     const startY = window.innerHeight - 50;
 
     flyingEmoji.style.left = `${startX}px`;
@@ -420,7 +431,8 @@ export class ReactionComponent extends HTMLElement {
 
     // より確実なタイミングでアニメーション開始
     setTimeout(() => {
-      flyingEmoji.classList.add('animate');
+      const animateClassName = Math.random() > 0.5 ? 'animate1' : 'animate2'
+      flyingEmoji.classList.add(animateClassName);
     }, 10); // 10ms の遅延
 
     // アニメーション終了後に削除
@@ -428,7 +440,7 @@ export class ReactionComponent extends HTMLElement {
       if (flyingEmoji.parentNode) {
         flyingEmoji.parentNode.removeChild(flyingEmoji);
       }
-    }, 2000);
+    }, 3000);
   }
 
   private cleanup(): void {

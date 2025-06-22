@@ -5,6 +5,7 @@ provider:
   runtime: nodejs22.x
   region: ap-northeast-1
   stage: v1
+  logRetentionInDays: 1
   environment:
     VOTES_TABLE: ${self:service}-votes-${self:provider.stage}
     CONNECTIONS_TABLE: ${self:service}-connections-${self:provider.stage}
