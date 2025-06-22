@@ -26,7 +26,6 @@ export interface VoteMessage extends WebSocketMessage<{
 export interface RequestVoteResultMessage extends WebSocketMessage<{
   key: string;
 }> {
-  action?: string;
   type: 'REQUEST_VOTE_RESULT';
 }
 
@@ -38,6 +37,22 @@ export interface VoteUpdateMessage extends WebSocketMessage<{
   userVoteId?: string;  // 投票したユーザーのvoteId
 }> {
   type: 'VOTE_UPDATE';
+}
+
+// リアクション送信メッセージ（クライアント → サーバー）
+export interface ReactionMessage extends WebSocketMessage<{
+  emoji: string;
+  timestamp: number;
+}> {
+  type: 'REACTION';
+}
+
+// リアクションブロードキャストメッセージ（サーバー → クライアント）
+export interface ReactionBroadcastMessage extends WebSocketMessage<{
+  emoji: string;
+  timestamp: number;
+}> {
+  type: 'REACTION_BROADCAST';
 }
 
 // 接続管理データ型

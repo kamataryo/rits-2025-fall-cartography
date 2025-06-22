@@ -1,6 +1,6 @@
 import { ApiGatewayManagementApiClient, PostToConnectionCommand } from '@aws-sdk/client-apigatewaymanagementapi';
 import { dynamoDBService } from './dynamodb';
-import { VoteUpdateMessage } from '../models/vote';
+import { VoteUpdateMessage, ReactionBroadcastMessage } from '../models/vote';
 
 export class WebSocketService {
   // API Gateway Management API クライアントを動的に作成
@@ -95,6 +95,35 @@ export class WebSocketService {
       console.log(`Broadcasted vote update for key: ${key} to ${connections.length} connections`);
     } catch (error) {
       console.error('Failed to broadcast vote update:', error);
+      throw error;
+    }
+  }
+
+  // 全クライアントにリアクションをブロードキャスト
+  async broadcastReaction(event: any, emoji: string, timestamp: number): Promise<void> {
+    try {
+      // 全接続を取得
+      const connections = await dynamoDBService.getAllConnections();
+
+      // ブロードキャストメッセージを作成
+      const message: ReactionBroadcastMessage = {
+        type: 'REACTION_BROADCAST',
+        data: {
+          emoji,
+          timestamp,
+        },
+      };
+
+      // 全接続にメッセージを送信
+      const sendPromises = connections.map(connection =>
+        this.sendMessageToConnection(event, connection.connectionId, message)
+      );
+
+      await Promise.allSettled(sendPromises);
+
+      console.log(`Broadcasted reaction ${emoji} to ${connections.length} connections`);
+    } catch (error) {
+      console.error('Failed to broadcast reaction:', error);
       throw error;
     }
   }

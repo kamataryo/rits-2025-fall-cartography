@@ -10,7 +10,6 @@ export interface VoteMessage extends WebSocketMessage<{
   content: string;
   voteId?: string;  // 既存投票のID（置換時に使用）
 }> {
-  action: 'vote';
   type: 'VOTE';
 }
 
@@ -18,7 +17,6 @@ export interface VoteMessage extends WebSocketMessage<{
 export interface RequestVoteResultMessage extends WebSocketMessage<{
   key: string;
 }> {
-  action: 'vote';
   type: 'REQUEST_VOTE_RESULT';
 }
 
@@ -59,6 +57,22 @@ export interface SingleChoiceProps extends BaseVoteComponentProps {}
 
 // 複数選択コンポーネントプロパティ
 export interface MultiChoiceProps extends BaseVoteComponentProps {}
+
+// リアクション送信メッセージ（クライアント → サーバー）
+export interface ReactionMessage extends WebSocketMessage<{
+  emoji: string;
+  timestamp: number;
+}> {
+  type: 'REACTION';
+}
+
+// リアクションブロードキャストメッセージ（サーバー → クライアント）
+export interface ReactionBroadcastMessage extends WebSocketMessage<{
+  emoji: string;
+  timestamp: number;
+}> {
+  type: 'REACTION_BROADCAST';
+}
 
 // 投票データ（LocalStorage用）
 export interface VoteRecord {

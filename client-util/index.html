@@ -115,6 +115,30 @@
     </div>
 
     <div class="test-section">
+        <h2>7. リアクションコンポーネント（デフォルト）</h2>
+        <div class="description">
+            右下に固定表示される👍ボタン。マウスオーバーまたは長押しで展開、クリックでリアクション送信。
+        </div>
+        <reaction-component></reaction-component>
+    </div>
+
+    <div class="test-section">
+        <h2>8. リアクションコンポーネント（カスタムEmoji）</h2>
+        <div class="description">
+            <code>emojis</code> 属性でカスタムEmojiを指定。複数のEmojiから選択可能。
+        </div>
+        <reaction-component emojis="👍,❤️,😂,😮,😢,😡"></reaction-component>
+    </div>
+
+    <div class="test-section">
+        <h2>9. リアクションコンポーネント（授業用）</h2>
+        <div class="description">
+            授業で使いやすいEmojiセット。理解度や感情を表現。
+        </div>
+        <reaction-component emojis="👍,👎,🤔,💡,❓,🎉"></reaction-component>
+    </div>
+
+    <div class="test-section">
         <h2>使用方法</h2>
         <ol>
             <li>WebSocketサーバーがデプロイされていることを確認</li>
@@ -122,6 +146,8 @@
             <li>各フォームで投票を試す</li>
             <li>リアルタイムでチャートが更新されることを確認</li>
             <li>複数のブラウザタブで開いて、ブロードキャスト機能を確認</li>
+            <li>リアクションボタンをクリック・ホバー・長押しして動作確認</li>
+            <li>他のデバイスからリアクションを送信して、飛行アニメーションを確認</li>
         </ol>
 
     <!-- クライアントライブラリを読み込み -->

@@ -54,7 +54,7 @@ functions:
     handler: src/handlers/vote.handler
     events:
       - websocket:
-          route: vote
+          route: $default
           cors: true
 
   serveClient:

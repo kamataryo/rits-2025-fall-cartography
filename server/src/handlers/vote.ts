@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { v4 as uuidv4 } from 'uuid';
 import { dynamoDBService } from '../services/dynamodb';
 import { webSocketService } from '../services/websocket';
-import { VoteItem, VoteMessage, RequestVoteResultMessage } from '../models/vote';
+import { VoteItem, VoteMessage, RequestVoteResultMessage, ReactionMessage } from '../models/vote';
 import { validateVoteMessage } from '../utils/validation';
 import { createWebSocketResponse } from '../utils/response';
 
@@ -13,17 +13,37 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const connectionId = event.requestContext.connectionId!;
 
     // メッセージをパース
-    let message: VoteMessage | RequestVoteResultMessage;
+    let message: VoteMessage | RequestVoteResultMessage | ReactionMessage;
     try {
       const parsedBody = JSON.parse(event.body || '{}');
-      message = parsedBody as VoteMessage | RequestVoteResultMessage;
+      message = parsedBody as VoteMessage | RequestVoteResultMessage | ReactionMessage;
     } catch (error) {
       console.error('Invalid JSON in message body:', error);
       return createWebSocketResponse(400);
     }
 
-    // メッセージタイプに応じて処理を分岐
-    if (message.type === 'VOTE') {
+    // typeフィールドによる処理分岐
+    if (message.type === 'REACTION') {
+      // リアクション処理
+      const reactionMessage = message as ReactionMessage;
+
+      // バリデーション
+      if (!reactionMessage.data.emoji || typeof reactionMessage.data.emoji !== 'string') {
+        console.error('Invalid emoji in reaction message');
+        return createWebSocketResponse(400);
+      }
+
+      if (!reactionMessage.data.timestamp || typeof reactionMessage.data.timestamp !== 'number') {
+        console.error('Invalid timestamp in reaction message');
+        return createWebSocketResponse(400);
+      }
+
+      console.log(`Received reaction: ${reactionMessage.data.emoji} from connection: ${connectionId}`);
+
+      // 全クライアントにリアクションをブロードキャスト
+      await webSocketService.broadcastReaction(event, reactionMessage.data.emoji, reactionMessage.data.timestamp);
+
+    } else if (message.type === 'VOTE') {
       // 投票処理
       const voteMessage = message as VoteMessage;
 

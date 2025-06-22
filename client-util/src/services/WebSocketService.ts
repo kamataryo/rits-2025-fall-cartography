@@ -3,6 +3,8 @@ import {
   VoteMessage,
   VoteUpdateMessage,
   RequestVoteResultMessage,
+  ReactionMessage,
+  ReactionBroadcastMessage,
 } from '../types/index';
 
 // @ts-ignore
@@ -69,7 +71,6 @@ export class WebSocketService extends EventTarget {
     }
 
     const message: VoteMessage = {
-      action: 'vote',
       type: 'VOTE',
       data: {
         key: voteKey,
@@ -93,7 +94,6 @@ export class WebSocketService extends EventTarget {
     }
 
     const message: RequestVoteResultMessage = {
-      action: 'vote',
       type: 'REQUEST_VOTE_RESULT',
       data: {
         key: voteKey
@@ -104,6 +104,28 @@ export class WebSocketService extends EventTarget {
       this.ws.send(JSON.stringify(message));
     } catch (error) {
       console.error('Failed to request vote result:', error);
+      this.dispatchEvent(new CustomEvent('error', { detail: error }));
+    }
+  }
+
+  public sendReaction(emoji: string): void {
+    if (this.state !== WebSocketState.CONNECTED || !this.ws) {
+      console.warn('WebSocket not connected. Cannot send reaction.');
+      return;
+    }
+
+    const message: ReactionMessage = {
+      type: 'REACTION',
+      data: {
+        emoji: emoji,
+        timestamp: Date.now()
+      }
+    };
+
+    try {
+      this.ws.send(JSON.stringify(message));
+    } catch (error) {
+      console.error('Failed to send reaction:', error);
       this.dispatchEvent(new CustomEvent('error', { detail: error }));
     }
   }
@@ -150,7 +172,14 @@ export class WebSocketService extends EventTarget {
   private handleMessage(message: any): void {
     if (message.type === 'VOTE_UPDATE') {
       this.handleVoteUpdate(message as VoteUpdateMessage);
+    } else if (message.type === 'REACTION_BROADCAST') {
+      this.handleReactionBroadcast(message as ReactionBroadcastMessage);
     }
+  }
+
+  private handleReactionBroadcast(message: ReactionBroadcastMessage): void {
+    // リアクションブロードキャストイベントを発火
+    this.dispatchEvent(new CustomEvent('reaction-broadcast', { detail: message }));
   }
 
   private handleVoteUpdate(message: VoteUpdateMessage): void {
