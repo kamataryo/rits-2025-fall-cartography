@@ -61,6 +61,15 @@ MapLibre GL JS と OpenStreetMap で始めるウェブカートグラフィ入�
 
 ---
 
+## リアクション
+
+- リアクション機能もつけたよ
+- 右下のボタンで Emoji を送れる
+- リアクションしてくれなかったら悲しいね
+<reaction-component emojis="👍,👎,🤔,💡"></reaction-component>
+
+---
+
 ## 地図とは何か？
 
 ### 地図の定義

@@ -221,7 +221,7 @@ export class ReactionComponent extends HTMLElement {
       </div>
     `;
 
-    this.updateEmojiOptions();
+    this.updateEmojiOptions()
   }
 
   private updateEmojiOptions(): void {
