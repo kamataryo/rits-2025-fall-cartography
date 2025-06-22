@@ -22,6 +22,7 @@ export class ReactionComponent extends HTMLElement {
 
   connectedCallback(): void {
     this.componentConnected = true;
+    this.setupGlobalStyles();
     this.setupEventListeners();
     this.setupWebSocket();
   }
@@ -43,6 +44,47 @@ export class ReactionComponent extends HTMLElement {
       return emojis.split(',').map(e => e.trim()).filter(e => e);
     }
     return ['👍']; // デフォルト
+  }
+
+  private setupGlobalStyles(): void {
+    // 既にスタイルが追加されているかチェック
+    const existingStyle = document.getElementById('reaction-component-global-styles');
+    if (existingStyle) return;
+
+    // グローバルスタイルを作成
+    const style = document.createElement('style');
+    style.id = 'reaction-component-global-styles';
+    style.textContent = `
+      .flying-emoji {
+        position: fixed;
+        font-size: 24px;
+        pointer-events: none;
+        z-index: 1001;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      @keyframes flyUp {
+        0% {
+          transform: translateY(0) scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: translateY(-100px) scale(1.2);
+          opacity: 0.8;
+        }
+        100% {
+          transform: translateY(-200px) scale(0.8);
+          opacity: 0;
+        }
+      }
+
+      .flying-emoji.animate {
+        animation: flyUp 2s ease-out forwards;
+      }
+    `;
+
+    document.head.appendChild(style);
   }
 
   private render(): void {
@@ -137,34 +179,6 @@ export class ReactionComponent extends HTMLElement {
 
         .emoji-button:active {
           transform: scale(0.9);
-        }
-
-        .flying-emoji {
-          position: fixed;
-          font-size: 24px;
-          pointer-events: none;
-          z-index: 1001;
-          user-select: none;
-          -webkit-user-select: none;
-        }
-
-        @keyframes flyUp {
-          0% {
-            transform: translateY(0) scale(1);
-            opacity: 1;
-          }
-          50% {
-            transform: translateY(-100px) scale(1.2);
-            opacity: 0.8;
-          }
-          100% {
-            transform: translateY(-200px) scale(0.8);
-            opacity: 0;
-          }
-        }
-
-        .flying-emoji.animate {
-          animation: flyUp 2s ease-out forwards;
         }
 
         /* モバイル対応 */

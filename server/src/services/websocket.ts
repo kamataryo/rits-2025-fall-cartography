@@ -99,11 +99,18 @@ export class WebSocketService {
     }
   }
 
-  // 全クライアントにリアクションをブロードキャスト
+  // 全クライアントにリアクションをブロードキャスト（送信者を除く）
   async broadcastReaction(event: any, emoji: string, timestamp: number): Promise<void> {
     try {
+      const senderConnectionId = event.requestContext.connectionId;
+
       // 全接続を取得
       const connections = await dynamoDBService.getAllConnections();
+
+      // 送信者を除外
+      const targetConnections = connections.filter(connection =>
+        connection.connectionId !== senderConnectionId
+      );
 
       // ブロードキャストメッセージを作成
       const message: ReactionBroadcastMessage = {
@@ -114,14 +121,14 @@ export class WebSocketService {
         },
       };
 
-      // 全接続にメッセージを送信
-      const sendPromises = connections.map(connection =>
+      // 送信者以外の全接続にメッセージを送信
+      const sendPromises = targetConnections.map(connection =>
         this.sendMessageToConnection(event, connection.connectionId, message)
       );
 
       await Promise.allSettled(sendPromises);
 
-      console.log(`Broadcasted reaction ${emoji} to ${connections.length} connections`);
+      console.log(`Broadcasted reaction ${emoji} to ${targetConnections.length} connections (excluding sender)`);
     } catch (error) {
       console.error('Failed to broadcast reaction:', error);
       throw error;
