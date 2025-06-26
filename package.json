@@ -8,7 +8,7 @@
     "build:pdf": "marp --config marp.config.js -I slides/ --pdf -o output/pdf/",
     "build:pptx": "marp --config marp.config.js -I slides/ --pptx -o output/pptx/",
     "build:all": "rm -rf output && npm run build && npm run build:pdf && npm run build:pptx",
-    "dev": "marp -w -s --config marp.config.js -I slides/ --watch -o output/html/ --html"
+    "dev": "(sleep 3; open http://localhost:8080) & marp -w -s --config marp.config.js -I slides/ --watch -o output/html/ --html"
   },
   "keywords": [
     "cartography",
