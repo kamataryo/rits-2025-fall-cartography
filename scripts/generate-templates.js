@@ -162,11 +162,11 @@ paginate: true
 
 <!-- _class: title -->
 
-# MapLibre GL JS と OpenStreetMap で始めるウェブカートグラフィ入門
+# MapLibre GL JS と OpenStreetMap で始める<br />ウェブカートグラフィ入門
 
 ## 第${lesson.number}回：${lesson.title}
 
-立命館大学 2025年度秋学期
+立命館大学 2025年度 秋セメスター 火曜5限
 
 ---
 

@@ -7,11 +7,11 @@ paginate: true
 
 <!-- _class: title -->
 
-# MapLibre GL JS と OpenStreetMap で始めるウェブカートグラフィ入門
+# MapLibre GL JS と OpenStreetMap で始める<br />ウェブカートグラフィ入門
 
 ## 第7-8回：MapLibre GL JS の基礎操作
 
-立命館大学 2025年度秋学期
+立命館大学 2025年度 秋セメスター 火曜5限
 授業時間：170分（2回分）
 
 ---

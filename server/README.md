@@ -463,12 +463,3 @@ npm run type-check
 #### ビルド成果物
 - `dist/vote-client.js` - 単一JSファイル（CDN配信用）
 - `dist/index.d.ts` - TypeScript型定義ファイル
-
-## 📄 ライセンス
-
-MIT License
-
----
-
-**立命館大学 2025年度秋学期**  
-**ウェブカートグラフィ入門 - 投票システム**
