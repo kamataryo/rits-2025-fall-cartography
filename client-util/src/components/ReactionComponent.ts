@@ -43,7 +43,8 @@ export class ReactionComponent extends HTMLElement {
     if (emojis && emojis.trim()) {
       return emojis.split(',').map(e => e.trim()).filter(e => e);
     }
-    return ['👍']; // デフォルト
+    // BUG: emojis 属性、指定してもデフォルトになってしまうことがある
+    return ['👍','👎','❓','🤔','💡']; // デフォルト
   }
 
   private setupGlobalStyles(): void {
@@ -102,7 +103,7 @@ export class ReactionComponent extends HTMLElement {
       <style>
         :host {
           position: fixed;
-          bottom: 60px;
+          bottom: 20px;
           right: 20px;
           z-index: 1000;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
