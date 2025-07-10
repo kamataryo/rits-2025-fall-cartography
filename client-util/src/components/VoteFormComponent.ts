@@ -153,11 +153,16 @@ export class VoteFormComponent extends HTMLElement {
           padding: 20px;
           background: #fff;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          // display: flex;
+        }
+
+        .vote-contents {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
         }
 
         .vote-form {
-          margin-bottom: 20px;
+          width: calc(50% - 20px);
         }
 
         .form-group:last-child {
@@ -224,6 +229,7 @@ export class VoteFormComponent extends HTMLElement {
         .chart-container {
           margin-top: 20px;
           position: relative;
+          width: 50%;
           height: 300px;
         }
 
@@ -275,14 +281,16 @@ export class VoteFormComponent extends HTMLElement {
       <div class="vote-container">
         <div class="connection-status" id="connection-status">接続中...</div>
 
-        <form class="vote-form" id="vote-form">
-          <div class="form-submit-group">
-            <button type="submit">送信する</button>
-          </div>
-        </form>
+        <div class="vote-contents">
+          <form class="vote-form" id="vote-form">
+            <div class="form-submit-group">
+              <button type="submit">送信する</button>
+            </div>
+          </form>
 
-        <div class="chart-container">
-          <canvas id="chart"></canvas>
+          <div class="chart-container">
+            <canvas id="chart"></canvas>
+          </div>
         </div>
       </div>
     `;

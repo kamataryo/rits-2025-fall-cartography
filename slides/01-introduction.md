@@ -7,8 +7,8 @@ _html: true
 ---
 
 <script src="https://g69ye6vo2a.execute-api.ap-northeast-1.amazonaws.com/v1/client/vote-client.min.js"></script>
-<!-- <vote-form vote-key="language" freetext="on" choices="C言語,JavaScript,Python,Ruby" /> -->
-<!-- <reaction-component emojis="👍,👎,🤔,💡"></reaction-component> -->
+
+<reaction-component emojis="👍,👎,🤔,💡"></reaction-component>
 
 <!-- _class: title -->
 

@@ -102,7 +102,7 @@ export class ReactionComponent extends HTMLElement {
       <style>
         :host {
           position: fixed;
-          bottom: 20px;
+          bottom: 60px;
           right: 20px;
           z-index: 1000;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
