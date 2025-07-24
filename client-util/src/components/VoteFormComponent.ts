@@ -14,7 +14,7 @@ export class VoteFormComponent extends HTMLElement {
   private form: HTMLFormElement | null = null;
 
   static get observedAttributes(): string[] {
-    return ['vote-key', 'choices', 'freetext'];
+    return ['vote-key', 'choices', 'freetext', 'view'];
   }
 
   constructor() {
@@ -56,6 +56,10 @@ export class VoteFormComponent extends HTMLElement {
     } else if ((name === 'choices' || name === 'freetext') && oldValue !== newValue) {
       if (this.componentConnected) {
         this.updateFormContent();
+      }
+    } else if (name === 'view' && oldValue !== newValue) {
+      if (this.componentConnected) {
+        this.recreateDisplayContainer();
       }
     }
   }
@@ -276,6 +280,44 @@ export class VoteFormComponent extends HTMLElement {
           color: #721c24;
           border: 1px solid #f5c6cb;
         }
+
+        .freeflow-container {
+          height: 300px;
+          overflow-y: auto;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          padding: 10px;
+          background: #fff;
+        }
+
+        .freeflow-item {
+          padding: 8px 12px;
+          margin-bottom: 8px;
+          background: #f8f9fa;
+          border-radius: 4px;
+          border-left: 3px solid #007bff;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .freeflow-content {
+          flex: 1;
+          color: #333;
+          font-weight: 400;
+          margin-right: 8px;
+        }
+
+        .freeflow-count {
+          color: #6c757d;
+          font-weight: bold;
+          font-size: 0.9em;
+          background: #e9ecef;
+          padding: 2px 6px;
+          border-radius: 12px;
+          min-width: 24px;
+          text-align: center;
+        }
       </style>
 
       <div class="vote-container">
@@ -307,9 +349,31 @@ export class VoteFormComponent extends HTMLElement {
   }
 
   private setupChart(): void {
-    if (!this.chartCanvas) return;
+    this.recreateDisplayContainer();
+  }
 
-    this.createChart();
+  private recreateDisplayContainer(): void {
+    const chartContainer = this._shadowRoot.querySelector('.chart-container');
+    if (!chartContainer) return;
+
+    // 既存のチャートを破棄
+    this.cleanup();
+
+    const view = this.getAttribute('view') || 'bar';
+
+    if (view === 'freeflow') {
+      // freeflowコンテナを作成
+      chartContainer.innerHTML = '<div class="freeflow-container" id="freeflow-display"></div>';
+      this.chartCanvas = null;
+    } else {
+      // デフォルト（bar）: チャートキャンバスを作成
+      chartContainer.innerHTML = '<canvas id="chart"></canvas>';
+      this.chartCanvas = chartContainer.querySelector('#chart');
+      this.createChart();
+    }
+
+    // 現在の投票結果を要求して表示を更新
+    this.requestCurrentVoteResult();
   }
 
   private createChart(): void {
@@ -452,7 +516,17 @@ export class VoteFormComponent extends HTMLElement {
     const message = event.detail as VoteUpdateMessage;
 
     if (message.data.key === this.voteKey) {
-      this.updateChart(message.data.summary);
+      this.updateDisplay(message.data.summary);
+    }
+  }
+
+  private updateDisplay(summary: Record<string, number>): void {
+    const view = this.getAttribute('view') || 'bar';
+
+    if (view === 'freeflow') {
+      this.updateFreeflowDisplay(summary);
+    } else {
+      this.updateChart(summary);
     }
   }
 
@@ -467,6 +541,37 @@ export class VoteFormComponent extends HTMLElement {
 
     // チャートを更新
     this.chart.update('active');
+  }
+
+  private updateFreeflowDisplay(summary: Record<string, number>): void {
+    const freeflowContainer = this._shadowRoot.querySelector('#freeflow-display');
+    if (!freeflowContainer) return;
+
+    // コンテナをクリア
+    freeflowContainer.innerHTML = '';
+
+    // 投票結果をソートして表示（投票数の多い順）
+    const sortedEntries = Object.entries(summary).sort((a, b) => b[1] - a[1]);
+
+    sortedEntries.forEach(([content, count]) => {
+      const itemElement = document.createElement('div');
+      itemElement.className = 'freeflow-item';
+
+      const contentElement = document.createElement('span');
+      contentElement.className = 'freeflow-content';
+      contentElement.textContent = content;
+
+      const countElement = document.createElement('span');
+      countElement.className = 'freeflow-count';
+      countElement.textContent = count > 1 ? `(${count})` : '';
+
+      itemElement.appendChild(contentElement);
+      itemElement.appendChild(countElement);
+      freeflowContainer.appendChild(itemElement);
+    });
+
+    // 最新の投票が見えるように一番下にスクロール
+    freeflowContainer.scrollTop = freeflowContainer.scrollHeight;
   }
 
   private requestCurrentVoteResult(): void {

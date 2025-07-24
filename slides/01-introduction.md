@@ -90,8 +90,8 @@ MapLibre GL JS と OpenStreetMap で始めるウェブカートグラフィ入�
 
 - 紙の地図とデジタルの地図（ウェブやアプリ）の違いは？
 - 紙、ウェブ、アプリ以外にどんな媒体があるだろうか？
-TODO: freeflow モード作成
-<vote-form vote-key="map-media" freetext="on" freeflow="on" />
+
+<vote-form vote-key="map-media" freetext="on" view="freeflow" />
 
 ---
 
@@ -107,7 +107,7 @@ TODO: freeflow モード作成
 
 デジタルの地図、特にウェブの地図は、紙などの媒体とどのように違うのだろう？
 
-<vote-form vote-key="map-media" freetext="on" freeflow="on" />
+<vote-form vote-key="map-media" freetext="on" view="freeflow" />
 
 ---
 
