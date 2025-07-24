@@ -12,6 +12,7 @@ export class VoteFormComponent extends HTMLElement {
   private componentConnected: boolean = false;
   private _shadowRoot: ShadowRoot;
   private form: HTMLFormElement | null = null;
+  private submitButton: HTMLButtonElement | null = null;
 
   static get observedAttributes(): string[] {
     return ['vote-key', 'choices', 'freetext', 'view'];
@@ -116,17 +117,39 @@ export class VoteFormComponent extends HTMLElement {
     const dynamicContent = this.generateFormContent();
     if (dynamicContent) {
       this.form.innerHTML = dynamicContent;
+
+      // ラジオボタンにchangeイベントリスナーを追加
+      const radioButtons = this.form.querySelectorAll<HTMLInputElement>('input[type="radio"][name="choice"]');
+      radioButtons.forEach(radio => {
+        radio.addEventListener('change', () => {
+          this.updateSubmitButtonState();
+        });
+      });
+
       const freeTextInput = this.form.querySelector<HTMLInputElement>('#freetext-input');
       const radioInput = this.form.querySelector<HTMLInputElement>('#freetext-radio');
       freeTextInput?.addEventListener('focus', (event) => {
         if(radioInput) {
             radioInput.checked = true; // ラジオボタンの値を更新
+            this.updateSubmitButtonState();
           }
         })
       freeTextInput?.addEventListener('change', (event) => {
         const text = (event.target as HTMLInputElement).value.trim();
         if(radioInput) {
-          radioInput.value = text
+          radioInput.value = text;
+          this.updateSubmitButtonState();
+        }
+      })
+      freeTextInput?.addEventListener('input', (event) => {
+        const text = (event.target as HTMLInputElement).value.trim();
+        if(radioInput) {
+          radioInput.value = text;
+          // 文字が入力されている場合はラジオボタンを選択状態にする
+          if (text.length > 0) {
+            radioInput.checked = true;
+          }
+          this.updateSubmitButtonState();
         }
       })
     }
@@ -134,11 +157,17 @@ export class VoteFormComponent extends HTMLElement {
     // submitボタンを最後に追加
     const submitGroup = document.createElement('div');
     submitGroup.className = 'form-group';
-    submitGroup.innerHTML = '<button type="submit" class="form-submit-group">送信する</button>';
+    submitGroup.innerHTML = '<button type="submit" class="form-submit-group" disabled>送信する</button>';
     this.form.appendChild(submitGroup);
+
+    // submitButtonの参照を取得
+    this.submitButton = this.form.querySelector<HTMLButtonElement>('button[type="submit"]');
 
     // フォーム送信イベントを再設定
     this.form.addEventListener('submit', this.handleSubmit.bind(this));
+
+    // 初期状態で送信ボタンの状態を更新
+    this.updateSubmitButtonState();
   }
 
   private render(): void {
@@ -478,6 +507,29 @@ export class VoteFormComponent extends HTMLElement {
     }
   }
 
+  private isFormValid(): boolean {
+    if (!this.form) return false;
+
+    // ラジオボタンが選択されているかチェック
+    const selectedRadio = this.form.querySelector<HTMLInputElement>('input[type="radio"][name="choice"]:checked');
+    if (!selectedRadio) return false;
+
+    // フリーテキストの場合、値が入力されているかチェック
+    if (selectedRadio.id === 'freetext-radio') {
+      const freeTextInput = this.form.querySelector<HTMLInputElement>('#freetext-input');
+      return freeTextInput ? freeTextInput.value.trim().length > 0 : false;
+    }
+
+    return true;
+  }
+
+  private updateSubmitButtonState(): void {
+    if (!this.submitButton) return;
+
+    const isValid = this.isFormValid();
+    this.submitButton.disabled = !isValid;
+  }
+
   private handleSubmit(event: Event): void {
     event.preventDefault();
 
@@ -486,7 +538,12 @@ export class VoteFormComponent extends HTMLElement {
       return;
     }
 
-    if (!this.form) return;
+    if (!this.form || !this.submitButton) return;
+
+    // 送信ボタンがdisabledの場合は処理を中断
+    if (this.submitButton.disabled) {
+      return;
+    }
 
     const formData = new FormData(this.form);
     let content = '';
@@ -507,6 +564,9 @@ export class VoteFormComponent extends HTMLElement {
 
     // フォームをリセット
     this.form.reset();
+
+    // フォームリセット後に送信ボタンの状態を更新
+    this.updateSubmitButtonState();
 
     // 送信完了メッセージ
     // this.showMessage('送信しました', 'success');
