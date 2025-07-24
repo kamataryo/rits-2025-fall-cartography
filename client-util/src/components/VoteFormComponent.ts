@@ -260,7 +260,6 @@ export class VoteFormComponent extends HTMLElement {
         }
 
         .chart-container {
-          margin-top: 20px;
           position: relative;
           width: 50%;
           height: 300px;
@@ -312,11 +311,49 @@ export class VoteFormComponent extends HTMLElement {
 
         .freeflow-container {
           height: 300px;
-          overflow-y: auto;
           border: 1px solid #ddd;
           border-radius: 4px;
-          padding: 10px;
           background: #fff;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .freeflow-content-wrapper {
+          height: 100%;
+          overflow-y: auto;
+          padding: 10px;
+        }
+
+        .freeflow-container::before,
+        .freeflow-container::after {
+          content: '';
+          position: absolute;
+          left: 1px;
+          right: 1px;
+          height: 20px;
+          pointer-events: none;
+          z-index: 2;
+          transition: opacity 0.3s ease;
+        }
+
+        .freeflow-container::before {
+          top: 1px;
+          background: linear-gradient(to bottom, rgba(255,255,255,0.9), transparent);
+          border-radius: 4px 4px 0 0;
+        }
+
+        .freeflow-container::after {
+          bottom: 1px;
+          background: linear-gradient(to top, rgba(255,255,255,0.9), transparent);
+          border-radius: 0 0 4px 4px;
+        }
+
+        .freeflow-container.scroll-top::before {
+          opacity: 0;
+        }
+
+        .freeflow-container.scroll-bottom::after {
+          opacity: 0;
         }
 
         .freeflow-item {
@@ -328,6 +365,12 @@ export class VoteFormComponent extends HTMLElement {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+
+        .freeflow-item.fade-in {
+          opacity: 0;
+          transform: translateY(-10px);
         }
 
         .freeflow-content {
@@ -392,8 +435,22 @@ export class VoteFormComponent extends HTMLElement {
 
     if (view === 'freeflow') {
       // freeflowコンテナを作成
-      chartContainer.innerHTML = '<div class="freeflow-container" id="freeflow-display"></div>';
+      chartContainer.innerHTML = '<div class="freeflow-container" id="freeflow-container"><div class="freeflow-content-wrapper" id="freeflow-display"></div></div>';
       this.chartCanvas = null;
+
+      // スクロールイベントリスナーを追加
+      const freeflowContainer = chartContainer.querySelector('#freeflow-container') as HTMLElement;
+      const freeflowWrapper = chartContainer.querySelector('#freeflow-display') as HTMLElement;
+      if (freeflowContainer && freeflowWrapper) {
+        freeflowWrapper.addEventListener('scroll', () => {
+          this.updateScrollIndicators(freeflowContainer);
+        });
+
+        // 初期状態でスクロールインジケーターを設定
+        setTimeout(() => {
+          this.updateScrollIndicators(freeflowContainer);
+        }, 100);
+      }
     } else {
       // デフォルト（bar）: チャートキャンバスを作成
       chartContainer.innerHTML = '<canvas id="chart"></canvas>';
@@ -604,18 +661,36 @@ export class VoteFormComponent extends HTMLElement {
   }
 
   private updateFreeflowDisplay(summary: Record<string, number>): void {
-    const freeflowContainer = this._shadowRoot.querySelector('#freeflow-display');
-    if (!freeflowContainer) return;
+    const freeflowWrapper = this._shadowRoot.querySelector('#freeflow-display') as HTMLElement;
+    const freeflowContainer = this._shadowRoot.querySelector('#freeflow-container') as HTMLElement;
+    if (!freeflowWrapper || !freeflowContainer) return;
+
+    // 既存のアイテムのコンテンツを記録
+    const existingItems = new Set<string>();
+    const existingElements = freeflowWrapper.querySelectorAll('.freeflow-item');
+    existingElements.forEach(element => {
+      const contentElement = element.querySelector('.freeflow-content');
+      if (contentElement) {
+        existingItems.add(contentElement.textContent || '');
+      }
+    });
 
     // コンテナをクリア
-    freeflowContainer.innerHTML = '';
+    freeflowWrapper.innerHTML = '';
 
     // 投票結果をソートして表示（投票数の多い順）
     const sortedEntries = Object.entries(summary).sort((a, b) => b[1] - a[1]);
 
     sortedEntries.forEach(([content, count]) => {
       const itemElement = document.createElement('div');
-      itemElement.className = 'freeflow-item';
+      const isNewItem = !existingItems.has(content);
+
+      // 新しいアイテムの場合、アニメーション用のクラスを追加
+      if (isNewItem) {
+        itemElement.className = 'freeflow-item fade-in';
+      } else {
+        itemElement.className = 'freeflow-item';
+      }
 
       const contentElement = document.createElement('span');
       contentElement.className = 'freeflow-content';
@@ -627,11 +702,44 @@ export class VoteFormComponent extends HTMLElement {
 
       itemElement.appendChild(contentElement);
       itemElement.appendChild(countElement);
-      freeflowContainer.appendChild(itemElement);
+      freeflowWrapper.appendChild(itemElement);
+
+      // 新しいアイテムの場合、アニメーションを開始
+      if (isNewItem) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            itemElement.classList.remove('fade-in');
+          });
+        });
+      }
     });
 
+    // スクロール状態を更新
+    this.updateScrollIndicators(freeflowContainer);
+
     // 最新の投票が見えるように一番下にスクロール
-    freeflowContainer.scrollTop = freeflowContainer.scrollHeight;
+    freeflowWrapper.scrollTop = freeflowWrapper.scrollHeight;
+  }
+
+  private updateScrollIndicators(container: HTMLElement): void {
+    const wrapper = container.querySelector('.freeflow-content-wrapper') as HTMLElement;
+    if (!wrapper) return;
+
+    const isAtTop = wrapper.scrollTop <= 5;
+    const isAtBottom = wrapper.scrollTop >= wrapper.scrollHeight - wrapper.clientHeight - 5;
+
+    // スクロール位置に応じてクラスを更新
+    if (isAtTop) {
+      container.classList.add('scroll-top');
+    } else {
+      container.classList.remove('scroll-top');
+    }
+
+    if (isAtBottom) {
+      container.classList.add('scroll-bottom');
+    } else {
+      container.classList.remove('scroll-bottom');
+    }
   }
 
   private requestCurrentVoteResult(): void {
