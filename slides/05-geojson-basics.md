@@ -41,6 +41,8 @@ section.title::after { top: 21px; }
 
 ---
 
+TODO: GeoJSON の前に JSON および JavaScriptとデータ交換について触れる
+
 ## 前回の振り返り
 
 ### 第3-4回の主要ポイント
