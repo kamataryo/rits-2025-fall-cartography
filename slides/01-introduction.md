@@ -80,7 +80,7 @@ MapLibre GL JS と OpenStreetMap で始めるウェブカートグラフィ入�
 
 ## 地図・ウェブ地図
 
-使ったことがあるを地図教えてください。
+使ったことがある地図を教えてください。
 
 <vote-form vote-key="favorite-maps" freetext="on" choices="Google Maps,マップ（iOS）,Yahoo!マップ,地理院地図,ゼンリン地図,地形図(国土地理院、紙)" />
 
@@ -88,7 +88,6 @@ MapLibre GL JS と OpenStreetMap で始めるウェブカートグラフィ入�
 
 ## 紙の地図・デジタルの地図
 
-- 紙の地図とデジタルの地図（ウェブやアプリ）の違いは？
 - 紙、ウェブ、アプリ以外にどんな媒体があるだろうか？
 
 <vote-form vote-key="map-media" freetext="on" view="freeflow" />
@@ -105,16 +104,18 @@ MapLibre GL JS と OpenStreetMap で始めるウェブカートグラフィ入�
 
 ## ウェブ地図の特徴
 
-デジタルの地図、特にウェブの地図は、紙などの媒体とどのように違うのだろう？
+**デジタル（ウェブ）** の地図は、**紙**などの媒体とどのように違うのだろう？
 
 <vote-form vote-key="map-media" freetext="on" view="freeflow" />
 
 ---
 
-## ウェブ地図の特徴（私の考え）
+## ウェブ地図の特徴
 
-- **オンデマンド** （必要な時に、必要なものを入手）
-- **インタラクティブ**（双方向性に情報をやり取り。ユーザーの操作に応じた多様なインターフェース）
+- **オンデマンド**
+必要な時に、必要なものを入手
+- **インタラクティブ**
+双方向に情報をやり取り。ユーザーの操作に応じた多様なインターフェース
 
 ---
 
@@ -141,11 +142,10 @@ MapLibre GL JS と OpenStreetMap で始めるウェブカートグラフィ入�
 ---
 
 #### その他の地図サービス
-- **Mapbox**: ベクトルタイル
 - **Apple Maps**: iOS標準
 - **Bing Maps**: Microsoft提供
 - **HERE Maps**: 自動車業界で強い
-- **国土地理院地図**: 日本の公的地図
+- **国土地理院地図**: 日本の公的機関
 
 ---
 
@@ -222,10 +222,11 @@ MapLibre GL JS と OpenStreetMap で始めるウェブカートグラフィ入�
 - GitHub であらかじめ用意した以下のリポジトリを codespace で開き、実行
 - カスタマイズして、表示がどう変わるか確認
 
-リポジトリ: https://github.com/kamataryo/rits-2025-fall-cartography__01-webmap-sample
+**実習用リポジトリ**:
+https://github.com/kamataryo/rits-2025-fall-cartography__01-webmap-sample
 
 Codespace で開く
-[](images/01_003_codespace.png)
+<img width="500" src="images/01_003_codespace.png" />
 
 ---
 
@@ -234,7 +235,8 @@ Codespace で開く
 - ズームを変える
 - 緯度経度を変える
 - 地図の種類を変える
-- ..
+
+※ 実習用リポジトリの中にコメントしています
 
 ---
 
@@ -281,7 +283,7 @@ Codespace で開く
 <div class="assignment">
 
 ### 提出要項
-- **形式など**: 400字程度。図や写真、スクリーンショット等を添付しても構いません。PDF / Word等。その他のフォーマットは応相談。
+- **形式など**: 400字程度。図や写真、スクリーンショット等を添付しても構いません。PDF / Word等。その他のフォーマットは応相談
 - **提出期限**: 次回授業開始時
 - **提出方法**: Manaba+R 経由
 - **評価基準**: 
@@ -302,7 +304,7 @@ Codespace で開く
 
 ### 連絡先
 - Manaba+R
-- **メール**: [kamata.y.ryo@gmail.com]
+- **メール**: kamata.y.ryo@gmail.com
 
 ---
 

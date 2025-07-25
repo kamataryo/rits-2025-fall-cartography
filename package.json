@@ -4,7 +4,7 @@
   "description": "立命館大学 2025年度 秋セメスター 火曜5限 ウェブカートグラフィ入門 授業スライド",
   "main": "index.js",
   "scripts": {
-    "build": "marp --config marp.config.js -I slides/ -o output/ --html",
+    "build": "marp --config marp.config.js -I slides/ -o output/ --html && cp -r ./slides/images ./output/images",
     "build:pdf": "marp --config marp.config.js -I slides/ --pdf -o output/pdf/",
     "build:pptx": "marp --config marp.config.js -I slides/ --pptx -o output/pptx/",
     "build:all": "rm -rf output && npm run build && npm run build:pdf && npm run build:pptx",
