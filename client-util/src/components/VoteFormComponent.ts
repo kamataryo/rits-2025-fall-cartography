@@ -128,6 +128,16 @@ export class VoteFormComponent extends HTMLElement {
 
       const freeTextInput = this.form.querySelector<HTMLInputElement>('#freetext-input');
       const radioInput = this.form.querySelector<HTMLInputElement>('#freetext-radio');
+
+      // Marpショートカットキーの伝播を阻止する関数
+      const preventMarpShortcuts = (event: KeyboardEvent) => {
+        const targetKeys = ['f', 'F', 'p', 'P', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '];
+
+        if (targetKeys.includes(event.key)) {
+          event.stopPropagation();
+        }
+      };
+
       freeTextInput?.addEventListener('focus', (event) => {
         if(radioInput) {
             radioInput.checked = true; // ラジオボタンの値を更新
@@ -152,6 +162,10 @@ export class VoteFormComponent extends HTMLElement {
           this.updateSubmitButtonState();
         }
       })
+
+      // Marpショートカットキーの誤発動を防ぐイベントリスナーを追加
+      freeTextInput?.addEventListener('keydown', preventMarpShortcuts);
+      freeTextInput?.addEventListener('keyup', preventMarpShortcuts);
     }
 
     // submitボタンを最後に追加
