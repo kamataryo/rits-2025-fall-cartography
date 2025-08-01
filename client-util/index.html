@@ -127,6 +127,527 @@
         <reaction-component emojis="👍,❤️,😂,😮,😢,😡"></reaction-component>
     </div>
 
+    <!-- カスタムスタイルサンプル -->
+    <div class="test-section">
+        <h2>9. カスタムスタイル - ダークテーマ</h2>
+        <div class="description">
+            <code>&lt;style&gt;</code> 要素を使用してダークテーマを適用。背景色、文字色、ボタンスタイルをカスタマイズ。
+        </div>
+        <vote-form vote-key="dark-theme" choices="選択肢A,選択肢B,選択肢C">
+            <style>
+                .vote-container {
+                    background: #2c3e50;
+                    color: #ecf0f1;
+                    border: 1px solid #34495e;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                }
+
+                .connection-status {
+                    background: #34495e;
+                    color: #ecf0f1;
+                    border: 1px solid #4a5f7a;
+                }
+
+                button {
+                    background: #e74c3c;
+                    color: white;
+                    border: 2px solid #c0392b;
+                }
+
+                button:hover {
+                    background: #c0392b;
+                    transform: translateY(-1px);
+                }
+
+                button:disabled {
+                    background: #7f8c8d;
+                    border-color: #95a5a6;
+                }
+
+                label {
+                    color: #bdc3c7;
+                }
+
+                input[type="text"] {
+                    background: #34495e;
+                    color: #ecf0f1;
+                    border: 1px solid #4a5f7a;
+                }
+
+                input[type="text"]:focus {
+                    border-color: #3498db;
+                    box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+                }
+            </style>
+        </vote-form>
+    </div>
+
+    <div class="test-section">
+        <h2>10. カスタムスタイル - グラデーションテーマ</h2>
+        <div class="description">
+            美しいグラデーション背景とガラスモーフィズム効果を適用。
+        </div>
+        <vote-form vote-key="gradient-theme" choices="素晴らしい,良い,普通,改善が必要" freetext="on">
+            <style>
+                .vote-container {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 20px;
+                    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+                    backdrop-filter: blur(4px);
+                    border: 1px solid rgba(255, 255, 255, 0.18);
+                }
+
+                .vote-form {
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 15px;
+                    padding: 20px;
+                    backdrop-filter: blur(10px);
+                }
+
+                button {
+                    background: rgba(255, 255, 255, 0.2);
+                    border: 2px solid rgba(255, 255, 255, 0.3);
+                    backdrop-filter: blur(10px);
+                    border-radius: 25px;
+                    color: white;
+                    font-weight: bold;
+                    transition: all 0.3s ease;
+                }
+
+                button:hover {
+                    background: rgba(255, 255, 255, 0.3);
+                    transform: translateY(-2px);
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                }
+
+                input[type="text"] {
+                    background: rgba(255, 255, 255, 0.2);
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                    color: white;
+                    border-radius: 10px;
+                    backdrop-filter: blur(5px);
+                }
+
+                input[type="text"]::placeholder {
+                    color: rgba(255, 255, 255, 0.7);
+                }
+
+                .radio-item {
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 8px 12px;
+                    border-radius: 8px;
+                    margin-bottom: 5px;
+                    transition: background 0.2s ease;
+                }
+
+                .radio-item:hover {
+                    background: rgba(255, 255, 255, 0.2);
+                }
+
+                .connection-status {
+                    background: rgba(255, 255, 255, 0.2);
+                    color: white;
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                }
+            </style>
+        </vote-form>
+    </div>
+
+    <div class="test-section">
+        <h2>11. カスタムスタイル - ミニマルテーマ</h2>
+        <div class="description">
+            シンプルで洗練されたミニマルデザイン。余計な装飾を排除。
+        </div>
+        <vote-form vote-key="minimal-theme" choices="はい,いいえ,わからない">
+            <style>
+                .vote-container {
+                    background: #ffffff;
+                    border: 2px solid #f0f0f0;
+                    border-radius: 0;
+                    box-shadow: none;
+                    padding: 30px;
+                }
+
+                button {
+                    background: transparent;
+                    color: #333;
+                    border: 2px solid #333;
+                    border-radius: 0;
+                    padding: 12px 30px;
+                    font-weight: 600;
+                    letter-spacing: 1px;
+                    text-transform: uppercase;
+                    transition: all 0.2s ease;
+                }
+
+                button:hover {
+                    background: #333;
+                    color: white;
+                }
+
+                button:disabled {
+                    border-color: #ccc;
+                    color: #ccc;
+                    background: transparent;
+                }
+
+                .radio-item {
+                    padding: 15px 0;
+                    border-bottom: 1px solid #f0f0f0;
+                }
+
+                .radio-item:last-child {
+                    border-bottom: none;
+                }
+
+                label {
+                    font-weight: 400;
+                    color: #666;
+                    font-size: 16px;
+                }
+
+                input[type="radio"] {
+                    margin-right: 15px;
+                    transform: scale(1.2);
+                }
+
+                .connection-status {
+                    background: transparent;
+                    color: #999;
+                    border: 1px solid #f0f0f0;
+                    font-size: 11px;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                }
+            </style>
+        </vote-form>
+    </div>
+
+    <div class="test-section">
+        <h2>12. カスタムスタイル - 企業ブランドテーマ</h2>
+        <div class="description">
+            企業のブランドカラーを使用したプロフェッショナルなデザイン。
+        </div>
+        <vote-form vote-key="corporate-theme" choices="強く同意,同意,中立,反対,強く反対">
+            <style>
+                .vote-container {
+                    background: #f8f9fa;
+                    border: 1px solid #dee2e6;
+                    border-radius: 12px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+                }
+
+                .vote-form {
+                    background: white;
+                    border-radius: 8px;
+                    padding: 25px;
+                    margin: 10px;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                }
+
+                button {
+                    background: linear-gradient(45deg, #007bff, #0056b3);
+                    border: none;
+                    border-radius: 6px;
+                    padding: 12px 25px;
+                    font-weight: 600;
+                    box-shadow: 0 2px 4px rgba(0,123,255,0.3);
+                    transition: all 0.2s ease;
+                }
+
+                button:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 8px rgba(0,123,255,0.4);
+                }
+
+                .radio-item {
+                    padding: 12px 16px;
+                    margin: 8px 0;
+                    border: 1px solid #e9ecef;
+                    border-radius: 6px;
+                    transition: all 0.2s ease;
+                }
+
+                .radio-item:hover {
+                    border-color: #007bff;
+                    background: #f8f9ff;
+                }
+
+                label {
+                    color: #495057;
+                    font-weight: 500;
+                    cursor: pointer;
+                }
+
+                input[type="radio"]:checked + label {
+                    color: #007bff;
+                    font-weight: 600;
+                }
+
+                .connection-status {
+                    background: #e7f3ff;
+                    color: #0056b3;
+                    border: 1px solid #b8daff;
+                    font-weight: 500;
+                }
+            </style>
+        </vote-form>
+    </div>
+
+    <div class="test-section">
+        <h2>13. カスタムスタイル - フリーフロー + カスタムテーマ</h2>
+        <div class="description">
+            フリーフローモードにカスタムスタイルを適用。アイテムの表示をカスタマイズ。
+        </div>
+        <vote-form vote-key="freeflow-custom" freetext="on" view="freeflow">
+            <style>
+                .vote-container {
+                    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+                    border: none;
+                    border-radius: 20px;
+                    color: white;
+                }
+
+                .freeflow-container {
+                    background: rgba(255, 255, 255, 0.1);
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    border-radius: 15px;
+                    backdrop-filter: blur(10px);
+                }
+
+                .freeflow-item {
+                    background: rgba(255, 255, 255, 0.2);
+                    border-left: 4px solid #fff;
+                    border-radius: 10px;
+                    backdrop-filter: blur(5px);
+                    transition: all 0.3s ease;
+                }
+
+                .freeflow-item:hover {
+                    background: rgba(255, 255, 255, 0.3);
+                    transform: translateX(5px);
+                }
+
+                .freeflow-content {
+                    color: white;
+                    font-weight: 500;
+                }
+
+                .freeflow-count {
+                    background: rgba(255, 255, 255, 0.3);
+                    color: white;
+                    font-weight: bold;
+                }
+
+                button {
+                    background: rgba(255, 255, 255, 0.2);
+                    border: 2px solid white;
+                    color: white;
+                    border-radius: 25px;
+                    font-weight: bold;
+                }
+
+                button:hover {
+                    background: white;
+                    color: #ff6b6b;
+                }
+
+                input[type="text"] {
+                    background: rgba(255, 255, 255, 0.2);
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                    color: white;
+                    border-radius: 10px;
+                }
+
+                input[type="text"]::placeholder {
+                    color: rgba(255, 255, 255, 0.7);
+                }
+            </style>
+        </vote-form>
+    </div>
+
+    <div class="test-section">
+        <h2>14. カスタムスタイル - アニメーション効果</h2>
+        <div class="description">
+            CSS アニメーションとトランジション効果を活用したインタラクティブなデザイン。
+        </div>
+        <vote-form vote-key="animation-theme" choices="🚀 素晴らしい,😊 良い,😐 普通,😞 改善必要">
+            <style>
+                @keyframes pulse {
+                    0% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                    100% { transform: scale(1); }
+                }
+
+                @keyframes slideIn {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+
+                .vote-container {
+                    background: linear-gradient(45deg, #ff9a9e, #fecfef, #fecfef, #ff9a9e);
+                    background-size: 400% 400%;
+                    animation: gradientShift 4s ease infinite;
+                    border: none;
+                    border-radius: 20px;
+                    color: #333;
+                }
+
+                @keyframes gradientShift {
+                    0% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                    100% { background-position: 0% 50%; }
+                }
+
+                .radio-item {
+                    animation: slideIn 0.5s ease forwards;
+                    opacity: 0;
+                    background: rgba(255, 255, 255, 0.3);
+                    border-radius: 15px;
+                    padding: 15px;
+                    margin: 10px 0;
+                    transition: all 0.3s ease;
+                    cursor: pointer;
+                }
+
+                .radio-item:nth-child(1) { animation-delay: 0.1s; }
+                .radio-item:nth-child(2) { animation-delay: 0.2s; }
+                .radio-item:nth-child(3) { animation-delay: 0.3s; }
+                .radio-item:nth-child(4) { animation-delay: 0.4s; }
+
+                .radio-item:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                    background: rgba(255, 255, 255, 0.5);
+                }
+
+                button {
+                    background: linear-gradient(45deg, #667eea, #764ba2);
+                    border: none;
+                    border-radius: 25px;
+                    color: white;
+                    font-weight: bold;
+                    padding: 15px 30px;
+                    transition: all 0.3s ease;
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                button:hover {
+                    animation: pulse 0.6s ease infinite;
+                    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+                }
+
+                button:active {
+                    transform: scale(0.95);
+                }
+
+                label {
+                    font-weight: 600;
+                    font-size: 16px;
+                    cursor: pointer;
+                    transition: color 0.2s ease;
+                }
+
+                input[type="radio"]:checked + label {
+                    color: #667eea;
+                    text-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+                }
+            </style>
+        </vote-form>
+    </div>
+
+    <div class="test-section">
+        <h2>15. カスタムスタイル - レスポンシブデザイン</h2>
+        <div class="description">
+            モバイルデバイスに最適化されたレスポンシブデザイン。画面サイズに応じてレイアウトが変化。
+        </div>
+        <vote-form vote-key="responsive-theme" choices="スマートフォン,タブレット,デスクトップ,その他" freetext="on">
+            <style>
+                .vote-container {
+                    background: #f8f9fa;
+                    border: 1px solid #dee2e6;
+                    border-radius: 15px;
+                }
+
+                .vote-contents {
+                    flex-direction: column;
+                    gap: 20px;
+                }
+
+                .vote-form, .chart-container {
+                    width: 100%;
+                }
+
+                .chart-container {
+                    height: 250px;
+                }
+
+                @media (min-width: 768px) {
+                    .vote-contents {
+                        flex-direction: row;
+                        align-items: flex-start;
+                    }
+
+                    .vote-form {
+                        width: calc(50% - 10px);
+                    }
+
+                    .chart-container {
+                        width: calc(50% - 10px);
+                        height: 300px;
+                    }
+                }
+
+                button {
+                    width: 100%;
+                    padding: 15px;
+                    background: #007bff;
+                    border: none;
+                    border-radius: 8px;
+                    color: white;
+                    font-size: 16px;
+                    font-weight: 600;
+                }
+
+                @media (min-width: 768px) {
+                    button {
+                        width: auto;
+                        padding: 12px 25px;
+                        font-size: 14px;
+                    }
+                }
+
+                .radio-item {
+                    padding: 15px;
+                    background: white;
+                    border: 2px solid #e9ecef;
+                    border-radius: 10px;
+                    margin: 10px 0;
+                }
+
+                input[type="text"] {
+                    padding: 15px;
+                    font-size: 16px;
+                    border-radius: 8px;
+                }
+
+                @media (min-width: 768px) {
+                    .radio-item {
+                        padding: 10px;
+                    }
+
+                    input[type="text"] {
+                        padding: 8px 12px;
+                        font-size: 14px;
+                    }
+                }
+            </style>
+        </vote-form>
+    </div>
+
     <div class="test-section">
         <h2>使用方法</h2>
         <ol>
@@ -138,6 +659,51 @@
             <li>リアクションボタンをクリック・ホバー・長押しして動作確認</li>
             <li>他のデバイスからリアクションを送信して、飛行アニメーションを確認</li>
         </ol>
+
+        <h3>カスタムスタイル機能</h3>
+        <p>セクション9-15では、新しく追加されたカスタムスタイル機能のサンプルを確認できます：</p>
+        <ul>
+            <li><strong>ダークテーマ</strong>: 暗い背景色と明るい文字色を使用</li>
+            <li><strong>グラデーションテーマ</strong>: 美しいグラデーション背景とガラスモーフィズム効果</li>
+            <li><strong>ミニマルテーマ</strong>: シンプルで洗練されたデザイン</li>
+            <li><strong>企業ブランドテーマ</strong>: プロフェッショナルな企業向けデザイン</li>
+            <li><strong>フリーフロー + カスタム</strong>: フリーフローモードにカスタムスタイルを適用</li>
+            <li><strong>アニメーション効果</strong>: CSS アニメーションとトランジション効果</li>
+            <li><strong>レスポンシブデザイン</strong>: モバイルデバイス対応のレスポンシブレイアウト</li>
+        </ul>
+
+        <h3>カスタマイズ可能な要素</h3>
+        <p><code>&lt;style&gt;</code> 要素内で以下のクラスをカスタマイズできます：</p>
+        <ul>
+            <li><code>.vote-container</code> - 全体のコンテナ</li>
+            <li><code>.vote-contents</code> - フォームとチャートの親要素</li>
+            <li><code>.vote-form</code> - フォーム全体</li>
+            <li><code>.form-group</code> - フォームグループ</li>
+            <li><code>.radio-group</code>, <code>.radio-item</code> - ラジオボタン関連</li>
+            <li><code>button</code> - 送信ボタン</li>
+            <li><code>input[type="text"]</code>, <code>input[type="radio"]</code> - 入力要素</li>
+            <li><code>label</code> - ラベル</li>
+            <li><code>.chart-container</code> - チャートコンテナ</li>
+            <li><code>.freeflow-container</code>, <code>.freeflow-item</code> - フリーフロー関連</li>
+            <li><code>.connection-status</code> - 接続状態表示</li>
+        </ul>
+
+        <h3>使用例</h3>
+        <pre><code>&lt;vote-form vote-key="my-vote" choices="選択肢1,選択肢2"&gt;
+  &lt;style&gt;
+    .vote-container {
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+      border-radius: 20px;
+      color: white;
+    }
+
+    button {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid white;
+      border-radius: 25px;
+    }
+  &lt;/style&gt;
+&lt;/vote-form&gt;</code></pre>
 
     <!-- クライアントライブラリを読み込み -->
     <!-- <script src="https://g69ye6vo2a.execute-api.ap-northeast-1.amazonaws.com/v1/client/vote-client.min.js"></script> -->

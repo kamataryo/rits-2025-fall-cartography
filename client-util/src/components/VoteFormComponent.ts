@@ -13,6 +13,8 @@ export class VoteFormComponent extends HTMLElement {
   private _shadowRoot: ShadowRoot;
   private form: HTMLFormElement | null = null;
   private submitButton: HTMLButtonElement | null = null;
+  private mutationObserver: MutationObserver | null = null;
+  private customStyleElement: HTMLStyleElement | null = null;
 
   static get observedAttributes(): string[] {
     return ['vote-key', 'choices', 'freetext', 'view'];
@@ -36,11 +38,13 @@ export class VoteFormComponent extends HTMLElement {
     this.setupForm();
     this.setupChart();
     this.setupWebSocket();
+    this.setupCustomStyles();
   }
 
   disconnectedCallback(): void {
     this.componentConnected = false;
     this.cleanup();
+    this.cleanupCustomStyles();
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string): void {
@@ -789,6 +793,81 @@ export class VoteFormComponent extends HTMLElement {
         messageElement.remove();
       }
     }, 3000);
+  }
+
+  private setupCustomStyles(): void {
+    // MutationObserverを設定して子要素の変更を監視
+    this.mutationObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList') {
+          this.processCustomStyles();
+        }
+      });
+    });
+
+    // 子要素の変更を監視開始
+    this.mutationObserver.observe(this, {
+      childList: true,
+      subtree: true
+    });
+
+    // 初期のカスタムスタイルを処理
+    this.processCustomStyles();
+  }
+
+  private cleanupCustomStyles(): void {
+    // MutationObserverを停止
+    if (this.mutationObserver) {
+      this.mutationObserver.disconnect();
+      this.mutationObserver = null;
+    }
+
+    // カスタムスタイル要素を削除
+    if (this.customStyleElement && this.customStyleElement.parentNode) {
+      this.customStyleElement.parentNode.removeChild(this.customStyleElement);
+      this.customStyleElement = null;
+    }
+  }
+
+  private processCustomStyles(): void {
+    try {
+      // Light DOM から <style> 要素を検索
+      const styleElements = this.querySelectorAll('style');
+
+      if (styleElements.length === 0) {
+        // <style> 要素がない場合、既存のカスタムスタイルを削除
+        if (this.customStyleElement && this.customStyleElement.parentNode) {
+          this.customStyleElement.parentNode.removeChild(this.customStyleElement);
+          this.customStyleElement = null;
+        }
+        return;
+      }
+
+      // 既存のカスタムスタイル要素を削除
+      if (this.customStyleElement && this.customStyleElement.parentNode) {
+        this.customStyleElement.parentNode.removeChild(this.customStyleElement);
+      }
+
+      // 新しいカスタムスタイル要素を作成
+      this.customStyleElement = document.createElement('style');
+
+      // すべての <style> 要素の内容を結合
+      let combinedStyles = '';
+      styleElements.forEach((styleElement) => {
+        if (styleElement.textContent) {
+          combinedStyles += styleElement.textContent + '\n';
+        }
+      });
+
+      // カスタムスタイルを設定
+      this.customStyleElement.textContent = combinedStyles;
+
+      // Shadow DOM に挿入
+      this._shadowRoot.appendChild(this.customStyleElement);
+
+    } catch (error) {
+      console.error('VoteFormComponent: Error processing custom styles:', error);
+    }
   }
 
   private cleanup(): void {
