@@ -76,6 +76,23 @@ section.title::after { top: 21px; }
 `場所 緯度・経度` の形式で投稿してみてください。（例: `京都駅 34.9965, 135.7979`）
 
 <vote-form vote-key="latlng-survey" freetext="on" view="freeflow">
+  <style>
+    .vote-contents {
+      flex-direction: column;
+    }
+    #vote-form {
+      display: flex;
+      align-items: center;
+    }
+    #vote-form .free-input-group {
+      flex-grow: 1;
+      margin-right: 1em;
+    }
+    .chart-container, .freeflow-container {
+      height: 200px;
+    }
+  </style>
+</vote-form>
 
 ---
 
@@ -90,6 +107,20 @@ TODO: どんな解説をしたら良いか？
 ジオメトリには、どのような種類があるだろう?
 
 <vote-form vote-key="spatial-data-geometry" freetext="on" view="freeflow">
+  <style>
+    .vote-contents {
+      flex-direction: column;
+    }
+    #vote-form {
+      display: flex;
+      align-items: center;
+    }
+    #vote-form .free-input-group {
+      flex-grow: 1;
+      margin-right: 1em;
+    }
+  </style>
+</vote-form>
 
 ---
 

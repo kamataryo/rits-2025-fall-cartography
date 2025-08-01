@@ -90,7 +90,21 @@ MapLibre GL JS と OpenStreetMap で始めるウェブカートグラフィ入�
 
 - 紙、ウェブ、アプリ以外にどんな媒体があるだろうか？
 
-<vote-form vote-key="map-media" freetext="on" view="freeflow" />
+<vote-form vote-key="map-media" freetext="on" view="freeflow">
+  <style>
+    .vote-contents {
+      flex-direction: column;
+    }
+    #vote-form {
+      display: flex;
+      align-items: center;
+    }
+    #vote-form .free-input-group {
+      flex-grow: 1;
+      margin-right: 1em;
+    }
+  </style>
+</vote-form>
 
 ---
 
@@ -106,7 +120,21 @@ MapLibre GL JS と OpenStreetMap で始めるウェブカートグラフィ入�
 
 **デジタル（ウェブ）** の地図は、**紙**などの媒体とどのように違うのだろう？
 
-<vote-form vote-key="map-media" freetext="on" view="freeflow" />
+<vote-form vote-key="map-media-difference" freetext="on" view="freeflow">
+  <style>
+    .vote-contents {
+      flex-direction: column;
+    }
+    #vote-form {
+      display: flex;
+      align-items: center;
+    }
+    #vote-form .free-input-group {
+      flex-grow: 1;
+      margin-right: 1em;
+    }
+  </style>
+<vote-form>
 
 ---
 
