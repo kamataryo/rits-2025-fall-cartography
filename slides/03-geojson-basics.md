@@ -43,11 +43,9 @@ section.title::after { top: 21px; }
 
 ## 前回の振り返り
 
-### 第5回の主要ポイント
-- GeoJSON フォーマットの理解
-- GeoJSON の構造と記法（Geometry, Feature, FeatureCollection）
-- 座標系と座標の順序（経度, 緯度）
-- 簡単な GeoJSON ファイルの作成
+### 第2回の主要ポイント
+
+// TODO 要点をまとめる
 
 ---
 
@@ -703,7 +701,8 @@ map.on('load', () => {
 
 ## 次回もよろしくお願いします
 
-**第6回: ウェブ地図の構成要素**
+**第4回: OpenStreetMap について**
+
 [日時・教室]
 
 課題の提出をお忘れなく！

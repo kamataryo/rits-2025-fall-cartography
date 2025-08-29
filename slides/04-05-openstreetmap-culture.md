@@ -62,6 +62,15 @@ section.title::after { top: 21px; }
 3. **データ取得・分析の実践** (15分)
 4. **課題説明** (5分)
 
+---
+
+## 前回の振り返り
+
+### 第3回の主要ポイント
+- GeoJSON フォーマットの理解
+- GeoJSON の構造と記法（Geometry, Feature, FeatureCollection）
+- 座標系と座標の順序（経度, 緯度）
+- 簡単な GeoJSON ファイルの作成
 
 ## OpenStreetMapデータの構造
 
@@ -943,7 +952,8 @@ Overpass Turbo（https://overpass-turbo.eu/）を使用して、興味のある�
 
 ## 次回もよろしくお願いします
 
-**第6回：GeoJSONの基礎**
+**第6回: ウェブ地図の構成要素**
+
 [日時・教室]
 
 課題の提出をお忘れなく！
