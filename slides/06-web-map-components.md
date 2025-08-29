@@ -43,11 +43,20 @@ section.title::after { top: 21px; }
 
 ## 前回の振り返り
 
-### 第5回の主要ポイント
-- GeoJSON フォーマットの理解
-- GeoJSON の構造と記法（Geometry, Feature, FeatureCollection）
-- 座標系と座標の順序（経度, 緯度）
-- 簡単な GeoJSON ファイルの作成
+### 第4-5回の主要ポイント
+- OpenStreetMapの歴史と哲学
+- OSMコミュニティとデータ作成プロセス
+- Overpass Turbo を使ったデータ取得
+- Overpass API の活用方法
+
+### 課題の確認
+
+Overpass Turbo を使った興味のあるエリアのデータ調査
+- 調査設計と仮説設定
+- データ取得と分析
+- 地理的分布の把握
+- 技術的な学びの整理
+
 
 ### 課題の確認
 個人の興味に基づく GeoJSON データの作成
