@@ -44,10 +44,9 @@ section.title::after { top: 21px; }
 ## 前回の振り返り
 
 ### 第4-5回の主要ポイント
-- OpenStreetMapの歴史と哲学
+- OpenStreetMapについて
 - OSMコミュニティとデータ作成プロセス
 - Overpass Turbo を使ったデータ取得
-- Overpass API の活用方法
 
 ### 課題の確認
 

@@ -785,6 +785,9 @@ Hello
 
 **第4-5回: OpenStreetMapのカルチャーと利用**
 
+授業準備: 以下のサイトから、アカウント登録を行なっておいてください。
+https://www.openstreetmap.org/user/new
+
 ---
 
 ## 質疑応答
