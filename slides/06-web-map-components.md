@@ -50,19 +50,7 @@ section.title::after { top: 21px; }
 
 ### 課題の確認
 
-Overpass Turbo を使った興味のあるエリアのデータ調査
-- 調査設計と仮説設定
-- データ取得と分析
-- 地理的分布の把握
-- 技術的な学びの整理
-
-
-### 課題の確認
-個人の興味に基づく GeoJSON データの作成
-- テーマの一貫性
-- 複数のジオメトリタイプの使用
-- 意味のあるプロパティ設定
-- geojson.io での可視化
+- Overpass Turbo を使った興味のあるエリアのデータ調査
 
 ---
 
@@ -71,22 +59,16 @@ Overpass Turbo を使った興味のあるエリアのデータ調査
 ### ウェブ地図の構成要素
 
 #### 基本的な構造
+
 ```
 ウェブ地図 = ベースマップ + オーバーレイ + UI要素
 ```
 
-#### レイヤー構造
-```
-┌─────────────────┐ ← UI要素（ボタン、コントロール）
-│  ┌───────────┐  │ ← オーバーレイ（データレイヤー）
-│  │ ベースマップ │  │ ← 背景地図
-│  └───────────┘  │
-└─────────────────┘
-```
+※ ただし、ベースマップとオーバーレイには明瞭な区別がない場合もあり
 
 ---
 
-### ベースマップ（Base Map）
+### ベースマップ
 
 #### 定義
 > 地図の背景となる基本的な地理情報を表示するレイヤー
@@ -102,85 +84,41 @@ Overpass Turbo を使った興味のあるエリアのデータ調査
 
 #### ベースマップの種類
 
-##### 1. 道路地図（Road Map）
-- **特徴**：道路網を中心とした表示
-- **用途**：ナビゲーション、経路案内
-- **例**：Google Maps、OpenStreetMap Standard
-
-##### 2. 衛星画像（Satellite）
-- **特徴**：航空写真・衛星写真
-- **用途**：現地の実際の様子を確認
-- **例**：Google Satellite、Bing Aerial
+- 道路地図
+- 衛星画像や航空写真
+- 地形図
+- 白地図
+- etc.
 
 ---
 
-##### 3. 地形図（Terrain）
-- **特徴**：標高・地形を強調
-- **用途**：登山、地理学習
-- **例**：OpenTopoMap、USGS Topo
-
-##### 4. ダークマップ（Dark Map）
-- **特徴**：暗い背景色
-- **用途**：データ可視化の背景
-- **例**：Mapbox Dark、CartoDB Dark Matter
-
----
-
-### オーバーレイ（Overlay）
+### オーバーレイ
 
 #### 定義
 > ベースマップの上に重ねて表示される追加の情報レイヤー
 
 #### 主要な種類
-- **ポイントデータ**：店舗、施設、イベント地点
-- **ルートデータ**：移動経路、境界線
-- **エリアデータ**：統計区域、影響範囲
+- **ポイントデータ**：店舗、施設、イベント地点、 etc.
+- **ルートデータ**：移動経路、境界線、etc.
+- **エリアデータ**：行政区域、影響範囲
+
+#### 時間的な分類
+- **統計データ**: 農業/工業等の生産統計、国勢調査データ
 - **リアルタイムデータ**：交通情報、気象情報
 
 ---
 
-#### オーバーレイの例
+### UI 要素
 
-##### 1. POI（Point of Interest）
-```javascript
-// レストランの位置情報
-{
-  "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "geometry": {"type": "Point", "coordinates": [135.5, 34.7]},
-      "properties": {"name": "カフェA", "category": "restaurant"}
-    }
-  ]
-}
-```
+> ユーザーインターフェース: ユーザーとコンピューターの境界
 
-##### 2. 統計データ
-- **人口密度**：色分けによる可視化
-- **売上データ**：円の大きさで表現
-- **時系列データ**：アニメーションで表現
+- 地図の移動・拡大・縮小
+- ベースマップを切り替える (絵地図 <-> 航空写真 など)
+- オーバーレイを切り替える (分析対象を変更する、など)
 
 ---
 
-### ベースマップとオーバーレイの関係
-
-#### 視覚的階層
-```
-高 ┌─────────────┐ ← ラベル・テキスト
-   │ オーバーレイ │ ← データレイヤー
-   │ ベースマップ │ ← 背景地図
-低 └─────────────┘
-```
-
-#### 設計原則
-- **ベースマップ**：控えめな色調、情報の整理
-- **オーバーレイ**：目立つ色、重要な情報を強調
-- **コントラスト**：背景と前景の明確な区別
-
----
-
-## タイルの仕組み
+### ベースマップとタイル
 
 ### タイルベース地図の概念
 
@@ -188,14 +126,34 @@ Overpass Turbo を使った興味のあるエリアのデータ調査
 > 地図を小さな正方形の画像に分割したもの
 
 #### 基本的な仕組み
-1. **分割**：地図を256×256ピクセルのタイルに分割
+1. **分割**：地図を256×256ピクセルのタイルに分割（512ピクセルの高解像度を利用するケースが多い）
 2. **階層化**：ズームレベルごとに異なる解像度
-3. **配信**：必要なタイルのみをダウンロード
-4. **表示**：タイルを組み合わせて地図を構成
+3. **配信**：必要なタイル**のみ**を必要な時にダウンロード
+4. **表示**：タイルを敷き詰めて地図を構成
+
+---
+
+## 実習: タイル配信を観察する
+
+地理院地図を使ってタイル配信の仕組みを調査する
+
+### 手順　
+
+1. [地理院地図](https://maps.gsi.go.jp/)を開く
+2. 開発ツールを開く(F12キーを押す)
+3. **ネットワーク** タブを開く
+4. 地理院地図をリロード(🔁ボタン)
+5. どのようなファイルがダウンロードされているかを観察
+6. 地図を動かしたり、ズームインしたりしてみて、再度観察
 
 ---
 
 ### ズームレベルとタイル数
+
+https://kamataryo.github.io/vector-grids/
+ズームが1上がるごとに、地図を4分割する
+
+---
 
 #### ズームレベルの定義
 - **レベル0**：全世界を1枚のタイル（256×256px）
@@ -203,17 +161,66 @@ Overpass Turbo を使った興味のあるエリアのデータ調査
 - **レベル2**：全世界を16枚のタイル（4×4）
 - **レベルn**：全世界を4^n枚のタイル
 
+---
+
 #### 解像度の関係
-| ズームレベル | タイル数 | 1ピクセルあたりの距離（赤道） |
-|-------------|----------|------------------------------|
-| 0 | 1 | 約156km |
-| 5 | 1,024 | 約4.9km |
-| 10 | 1,048,576 | 約153m |
-| 15 | 1,073,741,824 | 約4.8m |
+
+ズーム/緯度|0|10|20|30|40|50|60|70|80
+|||||||||
+1	20021.37km	 	 	 	 	 	 	 	 
+2	10010.68km	 	 	 	 	 	 	3641.25km	 
+3	5005.34km	 	 	 	 	3735.61km	 	1951.55km	917.17km
+4	2502.67km	 	 	2319.26km	 	1884.1km	1401.35km	992.01km	467.27km
+5	1251.34km	 	1227.52km	1160.42km	1061.27km	821.48km	703km	498.03km	234.73km
+6	625.67km	622.66km	599.46km	557.13km	502.24km	411.02km	323.89km	227.64km	117.5km
+7	312.83km	309.47km	295.23km	272.18km	243.72km	205.54km	161.98km	108.74km	56km
+8	156.42km	154.14km	147.62km	136.09km	119.98km	100.88km	79.31km	54.38km	27.33km
+9	78.21km	77.07km	73.5km	68.05km	59.99km	50.44km	39.24km	26.88km	13.67km
+10	39.1km	38.53km	36.75km	33.92km	30km	25.22km	19.62km	13.44km	6.79km
+11	19.55km	19.26km	18.38km	16.93km	15km	12.58km	9.78km	6.7km	3.4km
+12	9.78km	9.63km	9.19km	8.47km	7.49km	6.29km	4.89km	3.35km	1.7km
+13	4.89km	4.81km	4.59km	4.23km	3.75km	3.14km	2.44km	1.67km	849.04m
+14	2.44km	2.41km	2.3km	2.12km	1.87km	1.57km	1.22km	835.98m	424.52m
+15	1.22km	1.2km	1.15km	1.06km	936.19m	785.6m	611.02m	417.99m	212.22m
+16	611m	601.73m	574.16m	529.16m	468.07m	392.77m	305.51m	208.98m	106.11m
+17	305.5m	300.86m	287.08m	264.58m	234.03m	196.38m	152.76m	104.49m	53.05m
+18	152.75m	150.43m	143.54m	132.29m	117.02m	98.19m	76.38m	52.24m	26.53m
+19	76.38m	75.22m	71.77m	66.14m	58.51m	49.09m	38.19m	26.12m	13.26m
+20	38.19m	37.61m	35.88m	33.07m	29.25m	24.55m	19.09m	13.06m	663.12cm
+21	19.09m	18.8m	17.94m	16.54m	14.63m	12.27m	954.7cm	653.05cm	331.56cm
+22	954.69cm	940.19cm	897.12cm	826.79cm	731.34cm	613.67cm	477.35cm	326.52cm	165.78cm
+23	477.35cm	470.09cm	448.56cm	413.39cm	365.67cm	306.83cm	238.67cm	163.26cm	82.89cm
+24	238.67cm	235.05cm	224.28cm	206.7cm	182.83cm	153.42cm	119.34cm	81.63cm	41.45cm
+25	119.34cm	117.52cm	112.14cm	103.35cm	91.42cm	76.71cm	59.67cm	40.82cm	20.72cm
+26	59.67cm	58.76cm	56.07cm	51.67cm	45.71cm	38.35cm	29.83cm	20.41cm	10.36cm
+27	29.83cm	29.38cm	28.03cm	25.84cm	22.85cm	19.18cm	14.92cm	10.2cm	5.18cm
+28	14.92cm	14.69cm	14.02cm	12.92cm	11.43cm	9.59cm	7.46cm	5.1cm	2.59cm
+29	7.46cm	7.35cm	7.01cm	6.46cm	5.71cm	4.79cm	3.73cm	2.55cm	1.3cm
+30	3.73cm	3.67cm	3.5cm	3.23cm	2.86cm	2.4cm	1.86cm	1.28cm	0.65cm
+
+
+---
+
+### 実習
+
+1. ズームレベル 20 では、タイルの枚数は何枚になるか計算してみる
+2. ズームレベル 0 - 20 の全体では、タイルの枚数は合計何枚になるか計算してみる
+3. タイルの画像が 256px x 256px のサイズでビットマップ形式だった時
+    1. ズームレベル 20 ではどのくらいのサイズ(バイト数)になるか計算してみる
+    2. ズームレベル 0 - 20 の全体ではどのくらいのサイズになるか計算してみる
+
+ヒント:
+- ビットマップ画像とは、無圧縮の画像。1ピクセルあたり3バイトの情報量があります。
+- 1024バイト = 1キロバイト
+- 1024キロバイト = 1メガバイト
+- 1024メガバイト = 1ギガバイト
+- 1024ギガバイト = 1テラバイト
 
 ---
 
 ### タイル座標系
+
+// TODO: OSM Slippery Tile に変更
 
 #### TMS（Tile Map Service）座標
 ```
@@ -228,21 +235,12 @@ Y: 縦方向のタイル番号（南から北へ）
 https://tile.openstreetmap.org/15/29177/13212.png
 ```
 
-#### タイル境界の計算
-```javascript
-// 緯度経度からタイル座標を計算
-function deg2tile(lat, lon, zoom) {
-  const latRad = lat * Math.PI / 180;
-  const n = Math.pow(2, zoom);
-  const x = Math.floor((lon + 180) / 360 * n);
-  const y = Math.floor((1 - Math.asinh(Math.tan(latRad)) / Math.PI) / 2 * n);
-  return {x, y, z: zoom};
-}
-```
+<img src="https://tile.openstreetmap.org/15/29177/13212.png" />
+
 
 ---
 
-## ラスタータイル vs ベクトータイル
+## ラスタータイル vs ベクタータイル
 
 ### ラスタータイル（Raster Tiles）
 
@@ -253,7 +251,6 @@ function deg2tile(lat, lon, zoom) {
 
 #### メリット
 - **高速表示**：画像の表示のみ
-- **サーバー負荷軽減**：事前計算済み
 - **複雑な表現**：写真、複雑なスタイル
 
 ---
@@ -261,18 +258,12 @@ function deg2tile(lat, lon, zoom) {
 #### デメリット
 - **ファイルサイズ大**：画像データ
 - **スタイル変更不可**：固定デザイン
-- **高解像度対応困難**：Retina ディスプレイ
+- **高解像度対応困難**：Retina ディスプレイ => 512px が主流
 - **テキスト回転不可**：ラベルの向き固定
-
-#### 利用例
-```html
-<!-- OpenStreetMap ラスタータイル -->
-<img src="https://tile.openstreetmap.org/15/29177/13212.png" />
-```
 
 ---
 
-### ベクトータイル（Vector Tiles）
+### ベクタータイル（Vector Tiles）
 
 #### 特徴
 - **形式**：PBF（Protocol Buffers）、JSON
@@ -292,20 +283,11 @@ function deg2tile(lat, lon, zoom) {
 - **複雑な実装**：スタイル定義が必要
 - **ブラウザ依存**：WebGL 対応必須
 
-#### 利用例
-```javascript
-// MapLibre GL JS でのベクトータイル
-map.addSource('osm', {
-  type: 'vector',
-  tiles: ['https://tile.example.com/{z}/{x}/{y}.pbf']
-});
-```
-
 ---
 
 ### タイル形式の比較
 
-| 特徴 | ラスタータイル | ベクトータイル |
+| 特徴 | ラスタータイル | ベクタータイル |
 |------|----------------|----------------|
 | **ファイルサイズ** | 大きい | 小さい |
 | **表示速度** | 高速 | 中程度 |
@@ -313,6 +295,12 @@ map.addSource('osm', {
 | **高解像度対応** | 困難 | 容易 |
 | **インタラクション** | 制限あり | 豊富 |
 | **実装複雑度** | 簡単 | 複雑 |
+
+---
+
+## ラスタータイルとベクタータイルの比較
+
+TODO: 二本指でぐるっと
 
 ---
 
@@ -326,7 +314,7 @@ map.addSource('osm', {
 #### 特徴
 - **完全オープンソース**：MIT ライセンス
 - **Mapbox GL JS のフォーク**：2020年に分岐
-- **ベクトータイル対応**：高性能な地図表示
+- **ベクタータイル対応**：高性能な地図表示
 - **カスタマイズ性**：柔軟なスタイリング
 
 ---
@@ -347,7 +335,7 @@ map.addSource('osm', {
 
 ### 主要な機能
 
-#### 1. ベクトータイル表示
+#### 1. ベクタータイル表示
 - **高速レンダリング**：WebGL による GPU 活用
 - **スムーズなズーム**：連続的な拡大縮小
 - **回転・傾斜**：3D 的な地図操作
@@ -366,97 +354,24 @@ map.addSource('osm', {
 
 #### 4. データソース
 - **GeoJSON**：直接読み込み
-- **ベクトータイル**：効率的な大量データ
+- **ベクタータイル**：効率的な大量データ
 - **ラスタータイル**：従来形式との互換性
 - **画像・動画**：メディアの重ね合わせ
 
 ---
 
-## MapLibre GL JS のセットアップ
+## ウェブ地図を表示する
 
-### 基本的なHTML構造
+MapLibre GL JS を使用して、ベースマップを表示する
 
-#### 最小限の実装
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>MapLibre GL JS Example</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
-  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet">
-  <style>
-    body { margin: 0; padding: 0; }
-    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
-  </style>
-</head>
-<body>
-  <div id="map"></div>
-  <script>
-    // JavaScript コードをここに記述
-  </script>
-</body>
-</html>
-```
+### 手順
+1. HTML ファイルの作成
+2. MapLibre GL JS の読み込み
+3. 地図の初期化
+4. 基本的なスタイル設定
 
----
-
-### 基本的な地図の初期化
-
-#### JavaScript コード
-```javascript
-const map = new maplibregl.Map({
-  container: 'map', // HTML要素のID
-  style: {
-    version: 8,
-    sources: {
-      'raster-tiles': {
-        type: 'raster',
-        tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-        tileSize: 256,
-        attribution: '© OpenStreetMap contributors'
-      }
-    },
-    layers: [
-      {
-        id: 'simple-tiles',
-        type: 'raster',
-        source: 'raster-tiles'
-      }
-    ]
-  },
-  center: [135.5, 34.7], // 初期中心座標 [経度, 緯度]
-  zoom: 10 // 初期ズームレベル
-});
-```
-
----
-
-### パッケージマネージャーでの導入
-
-#### npm を使用した場合
-```bash
-# インストール
-npm install maplibre-gl
-
-# package.json への追加
-{
-  "dependencies": {
-    "maplibre-gl": "^3.6.2"
-  }
-}
-```
-
-#### ES6 モジュールでの使用
-```javascript
-import maplibregl from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
-
-const map = new maplibregl.Map({
-  // 設定オプション
-});
-```
+// TODO: フォーク用のサンプルリポジトリを作成
+// 解説と、以下の課題を調整
 
 ---
 
@@ -481,118 +396,17 @@ const map = new maplibregl.Map({
 
 ---
 
-### イベントハンドリング
-
-#### 地図の読み込み完了
-```javascript
-map.on('load', () => {
-  console.log('地図の読み込みが完了しました');
-  // データソースやレイヤーの追加はここで行う
-});
-```
-
-#### ユーザーインタラクション
-```javascript
-// クリックイベント
-map.on('click', (e) => {
-  console.log('クリック座標:', e.lngLat);
-});
-
-// ズーム変更イベント
-map.on('zoom', () => {
-  console.log('現在のズームレベル:', map.getZoom());
-});
-```
+- イベントハンドリング
+- ユーザーインタラクション
 
 ---
 
 ## 実習：基本的なウェブページでの地図表示
 
 ### 実習目標
-MapLibre GL JS を使用して、OpenStreetMap を背景とした基本的な地図を表示する
 
-### 手順
-1. HTML ファイルの作成
-2. MapLibre GL JS の読み込み
-3. 地図の初期化
-4. 基本的なスタイル設定
 
 ---
-
-### 実習コード
-```html
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="utf-8">
-  <title>第6回実習：基本的な地図表示</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
-  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet">
-  <style>
-    body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
-    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
-    .info-panel {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: white;
-      padding: 10px;
-      border-radius: 5px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      z-index: 1;
-    }
-  </style>
-</head>
-<body>
-  <div class="info-panel">
-    <h3>立命館大学周辺地図</h3>
-    <p>MapLibre GL JS + OpenStreetMap</p>
-  </div>
-  <div id="map"></div>
-  
-  <script>
-    const map = new maplibregl.Map({
-      container: 'map',
-      style: {
-        version: 8,
-        sources: {
-          'osm': {
-            type: 'raster',
-            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-            tileSize: 256,
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          }
-        },
-        layers: [
-          {
-            id: 'osm-tiles',
-            type: 'raster',
-            source: 'osm'
-          }
-        ]
-      },
-      center: [135.5122, 34.9981], // 立命館大学衣笠キャンパス
-      zoom: 14
-    });
-
-    // 地図読み込み完了時の処理
-    map.on('load', () => {
-      console.log('地図の読み込みが完了しました');
-    });
-
-    // クリック時の座標表示
-    map.on('click', (e) => {
-      console.log(`クリック座標: ${e.lngLat.lng}, ${e.lngLat.lat}`);
-    });
-  </script>
-</body>
-</html>
-```
-
----
-
-<div class="assignment">
 
 ## 課題：MapLibre GL JS を利用してベースマップを表示する簡単なウェブページを作成
 
