@@ -99,6 +99,280 @@ JSON、 XML、 CSV、 etc.
 
 ---
 
+## JSONサンプル
+
+```json
+[
+  {
+    "name": "たま",
+    "species": "cat",
+    "age": 5,
+    "favorites": ["カリカリ", "またたび"],
+    "location": { "pref": "京都府", "city": "京都市" }
+  },
+  {
+    "name": "ポチ",
+    "species": "dog",
+    "age": 6,
+    "favorites": ["いも", "肉類"],
+    "location": { "pref": "滋賀県", "city": "大津市" }
+  }
+]
+```
+
+---
+
+## XMLサンプル
+
+### 要素ベース
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<pets>
+  <pet>
+    <name>たま</name>
+    <species>cat</species>
+    <age>5</age>
+    <favorites>
+      <favorite>カリカリ</favorite>
+      <favorite>またたび</favorite>
+    </favorites>
+    <location>
+      <pref>京都府</pref>
+      <city>京都市</city>
+    </location>
+  </pet>
+  <pet>
+    <name>ポチ</name>
+    <species>dog</species>
+    <age>6</age>
+    <favorites>
+      <favorite>いも</favorite>
+      <favorite>肉類</favorite>
+    </favorites>
+    <location>
+      <pref>滋賀県</pref>
+      <city>大津市</city>
+    </location>
+  </pet>
+</pets>
+```
+
+---
+
+## XML サンプル
+
+### 属性ベース
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ペットのリスト: これはコメント -->
+<pets>
+  <pet name="たま" species="cat" age="5" location_pref="京都府" location_city="京都市">
+    <favorite name="カリカリ"/>
+    <favorite name="またたび"/>
+  </pet>
+  <pet name="ポチ" species="dog" age="6" location_pref="滋賀県" location_city="大津市">
+    <favorite name="いも"/>
+    <favorite name="肉類"/>
+  </pet>
+</pets>
+```
+
+XML を構成するもの:
+- 要素 ex. `<element></element>`
+- 属性 ex. `attribute="value"`
+- テキスノード ex. `<element>これがテキストノード</element>`
+
+---
+
+## XML のデータ型
+
+- XML はデータ型を持たない。`<age>10</age>` の テキストノードの値 `10` が数字なのか文字列なのかは機械判読不能
+- XML Schema として定義して利用
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <!-- pets 要素 -->
+  <xs:element name="pets">
+    <xs:complexType>
+      <xs:sequence>
+        <!-- pet 要素は1個以上 -->
+        <xs:element name="pet" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <!-- favorite 要素は0個以上 -->
+              <xs:element name="favorite" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:attribute name="name" type="xs:string" use="required"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="species" type="xs:string" use="required"/>
+            <xs:attribute name="age" type="xs:int" use="required"/>
+            <xs:attribute name="location_pref" type="xs:string" use="required"/>
+            <xs:attribute name="location_city" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+```
+
+---
+
+## YAML
+
+```yaml
+# ペットのリスト <- これはコメント
+pets:
+  - name: たま
+    species: cat
+    age: 5
+    favorites:
+      - カリカリ
+      - またたび
+    location:
+      pref: 京都府
+      city: 京都市
+
+  - name: ポチ
+    species: dog
+    age: 6
+    favorites:
+      - いも
+      - 肉類
+    location:
+      pref: 滋賀県
+      city: 大津市
+```
+
+---
+
+## CSV
+
+```csv
+name,cat,age,favorite_1,favorite_2,location_pref,location_city
+たま,cat,5,カリカリ,またたび,京都府,京都市
+ポチ,dog,4,いも,肉,滋賀県,大津市
+```
+
+| `name` | `species` | `age` | `favorite_1` | `favorite_2` | `location_pref` | `location_city` |
+|------|----------|-----|-------------|-------------|----------------|----------------|
+| たま | cat | 5 | カリカリ | またたび | 京都府 | 京都市 |
+| ポチ | dog | 4 | いも | 肉 | 滋賀県 | 大津市 |
+
+---
+
+## 巨大なデータを扱う
+
+- 例えば、以下の形式のJSONが 100万データあった場合、何 MB 程度になるだろうか？また、プロパティの数が10個、あるいは100個になったら？
+
+    ```json
+    [
+      {"name":"ペットの名前","age":年齢},
+      ...
+    ]
+    ```
+
+---
+
+### ヒント
+
+- アスキー文字(a-z,0-9, 記号) は 1byte/文字
+- 日本語などのマルチバイト文字は 3byte/文字だと仮定（実際は2-4byte）
+- ペットの名前は日本語で3文字だと仮定
+- 1024byte = 1kB
+- 1024kB = 1MB
+
+
+<vote-form vote-key="estimate-big-json" freetext="on" view="freeflow">
+  <style>
+    .vote-contents {
+      flex-direction: column;
+    }
+    #vote-form {
+      display: flex;
+      align-items: center;
+    }
+    #vote-form .free-input-group {
+      flex-grow: 1;
+      margin-right: 1em;
+    }
+    .chart-container, .freeflow-container {
+      height: 100px;
+    }
+  </style>
+</vote-form>
+
+---
+
+## CSV は大きなデータを扱いやすい
+
+- CSV = カンマ区切りの表形式データ
+  - 1行が1つのデータのまとまり
+  - 例：名前,年齢,住所
+- 逐次読み込みが簡単
+  - ファイルを上から順に1行ずつ読むだけで処理できる
+  - 「読みながら処理 → 終わったら忘れる」でメモリを節約
+-  YAML / XML / JSON は階層構造を持つ
+  - データがネスト（入れ子）になっている
+  - 1つのまとまりを理解するには、全体を一度に読み込む必要がある場合が多い
+
+### 結果
+
+- CSV：少ないメモリで大容量データも扱いやすい
+- XML / JSON：便利だがコンピューターのメモリを多く使いやすい
+
+---
+
+### 表現力の差
+
+||JSON|YAML|XML|CSV|
+|:--:|:--:|:--:|:--:|:--:|
+|入れ子構造|○|○|○|×|
+|データ型|○|○|×|×|
+|コメントサポート|×|○|○|×|
+|可読性|△|○|×|○|
+
+---
+
+### JSON vs. XML
+
+- XML は階層構造や属性を組み合わせた複雑なデータを表現できる。ドキュメント指向(e.g. HTML)
+- XML はスキーマに基づき要素・属性・型の正当性を事前検証できる
+- 小規模なデータの場合は JSON の方が可読性大きい
+- XML は機械判読にパーサー（処理プログラム）が必要。JSON はブラウザがネイティブサポート
+
+---
+
+### JSON vs. YAML
+
+- データ表現力に大きな違いはない
+- YAML の方が人間が読みやすいとされている
+- YAML もパーサーが必要なので処理に一手間あり
+
+---
+
+### JSON vs. CSV
+
+- CSV は 表形式のデータに最適で、行＝レコード、列＝フィールド
+- JSON のような階層構造やネストされたオブジェクトは表現できない
+- スプレッドシートへの取り込み/からの書き出しが容易
+
+---
+
+### なぜ多様なデータフォーマットが存在するのか
+
+- データ構造や用途が多様で、単一フォーマットではすべてに最適化できない
+- 可読性、処理効率、バリデーションなどの要件がフォーマットごとに異なる
+- 既存システムや業界標準との互換性を確保する必要がある
+
+---
+
 ## JSON の基本データ型
 
 ### プリミティブ型（基本型）
@@ -323,6 +597,18 @@ Hello
 
 ---
 
+## JSON vs. JavaScript
+
+- JavaScript の文法は JSON フォーマットの**スーパーセット**
+- JSON は JavaScript の**サブセット**、正しい JavaScript として解釈可能
+- ただし、JavaScript は JSON として解釈できない
+
+=>
+JSON は、JavaScript の自由な表現を「データ交換」に特化して制限したフォーマット
+この制限により、「相互運用性」「安全性」「可搬性」が保障されている
+
+---
+
 ## GeoJSONフォーマットの理解
 
 ### GeoJSON とは？
@@ -334,20 +620,6 @@ Hello
 - 実習: 過去の授業で使った [geojson.io](https://geojson.io) をまた使って、フォーマットを観察してみる
 
 用語: feature = 地物
-
----
-
-### GeoJSON vs 他の地理空間データ形式
-
-## テキスト
-
-| 形式 | 特徴 | 用途 |
-|------|------|------|
-| **GeoJSON** | JSON ベース、Web標準 | Web地図、API | 
-| **KML** | XML ベース、Google 標準 | Google Earth |
-| **GPX** | XML ベース、GPS 標準 | GPS 機器 |
-| **Shapefile** | ESRI 標準、バイナリ | GIS ソフト | 小さい |
-| **GeoPackage** | バイナリ |　GIS ソフト |  
 
 ---
 
@@ -549,6 +821,78 @@ Hello
 
 ---
 
+### GeoJSON vs 他の地理空間データ形式
+
+## テキスト
+
+| 形式 | 特徴 | 用途 |
+|------|------|------|
+| **GeoJSON** | JSON ベース、Web標準 | Web地図、API | 
+| **KML** | XML ベース、Google 標準 | Google Earth |
+| **GPX** | XML ベース、GPS 標準 | GPS 機器 |
+| **Shapefile** | ESRI 標準、バイナリ | GIS ソフト | 小さい |
+| **GeoPackage** | バイナリ |　GIS ソフト |  
+
+
+---
+
+## 他の位置情報フォーマットの概要
+
+### KML
+
+Point, LineString, Polygon をサポート。
+その他、3D モデルやトラック（時間付きの軌跡）なども。
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>サンプルKML</name>
+    <Placemark>
+      <name>サンプルポイント</name>
+      <description>ここに説明文を入れられます</description>
+      <Point>
+        <coordinates>135.7681,35.0116,10</coordinates>
+      </Point>
+    </Placemark>
+  </Document>
+</kml>
+```
+
+---
+
+### GPX
+
+点（wpt）、線（trk/trkpt）、ルート（rte/rtept）　をサポート
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Sample" xmlns="http://www.topografix.com/GPX/1/1">
+  <wpt lat="35.0116" lon="135.7681">
+    <ele>10</ele>
+    <name>サンプルポイント</name>
+    <desc>ここに説明文を入れられます</desc>
+  </wpt>
+</gpx>
+```
+
+---
+
+## その他の面白いデータフォーマット/位置情報データフォーマット
+
+## NDJSON　**N**ewline **D**elimited JSON (改行区切り JSON)
+
+- JSON にはない CSV のメリットとして、1行づつの逐次処理がしやすい点があった
+- では、 JSON を1行づつ処理できるようにするには？
+
+```ndjson
+{ "name": "たま", "age": 5 }
+{ "name": "ポチ", "age": 4 }
+...
+```
+
+---
+
 ## 簡単なGeoJSONファイルの作成
 
 ### 実習1: 大学周辺の施設マップ
@@ -716,6 +1060,7 @@ Hello
 3. 座標の取得（Google Maps、OpenStreetMap 等）
 4. GeoJSON形式での記述 (Windows のメモ帳や任意のテキストエディタを使う)
 5. プロパティ情報の追加
+6. テキストエンコーディングを UTF-8 に指定して、保存 
 
 ### 座標の取得方法
 
@@ -733,6 +1078,7 @@ Hello
 - **JSON Formatter**: https://jsonformatter.curiousconcept.com/
 
 #### よくあるエラー
+
 1. **座標の順序間違い**: 緯度・経度の順序
 2. **閉じていないPolygon**: 最初と最後の座標が異なる
 3. **JSON構文エラー**: カンマ、括弧の不備
