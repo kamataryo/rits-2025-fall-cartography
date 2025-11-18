@@ -48,7 +48,7 @@ section.title::after { top: 21px; }
 
 ### 課題の確認
 
-- Osmium を使った python のプログラムを利用して、さまざまなデータを抽出してみる
+- Osmium を使った Python のプログラムを利用して、さまざまなデータを抽出してみる
 
 ---
 
@@ -121,7 +121,7 @@ https://blog.geolonia.com/2020/07/06/zoom-level
 ### タイル座標系
 
 ```
-Z/Y/X 形式
+Z/X/Y 形式
 Z: ズームレベル
 X: 横方向(東西)のタイル番号
 Y: 縦方向(南北)のタイル番号
