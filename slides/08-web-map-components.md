@@ -69,7 +69,7 @@ section.title::after { top: 21px; }
 
 地理院地図を使ってタイル配信の仕組みを調査する
 
-### 手順　
+### 手順
 
 1. [地理院地図](https://maps.gsi.go.jp/)を開く
 2. 開発ツールを開く(F12キーを押す)
@@ -257,7 +257,7 @@ https://tile.openstreetmap.org/15/28719/13011.png
 1. OpenStreetMap から任意のデータを抜き出して GeoJSON に変換
 2. GeoJSON を Maplibre GL JS に表示する
 3. 地図を好きな形にカスタマイズする
-4. GitHub Pages として公開
+4. 変更を GitHub にプッシュする
 
 ---
 
@@ -267,7 +267,7 @@ https://tile.openstreetmap.org/15/28719/13011.png
 > https://github.com/kamataryo/rits-2025-fall-cartography__06-python-osmium
 
 1-1. 03_tag_filter_and_transform_to_geojson.py を実行
-1-2. 出力した　GeoJSON ファイルをダウンロード
+1-2. 出力した GeoJSON ファイルをダウンロード
 1-3. [geojson.io](https://geojson.io) などで確認
 
 ---
@@ -280,6 +280,8 @@ https://github.com/kamataryo/rits-2025-fall-cartography__08-webmap-sample
 2-2. 1 でダウンロードした GeoJSON をアップロード
 2-3. sample.geojson を置き換えて、表示を確認してみる
 
+---
+
 ## 3. 地図を好きな形にカスタマイズする
 
 - 地図の中心やズーム、最大・最小ズームを、置き換えた GeoJSON を見やすいものに変更してみる
@@ -287,6 +289,26 @@ https://github.com/kamataryo/rits-2025-fall-cartography__08-webmap-sample
 - シンボルレイヤー（テキスト）の色や大きさ、配置を変更してみる
 - name 以外のプロパティを表示してみる
 - クリックしたときに、name 以外のプロパティを表示してみる
+
+---
+
+## 4. 変更を GitHub にプッシュする
+
+ターミナルで以下のコマンドを実行し、変更(ファイルの追加や編集)を反映する:
+
+```shell
+# 変更を「ステージ」追加
+$ git add .
+
+# コミットを作成。コミットとは Git におけるバージョン管理の最小単位
+# -m 以降は、コミットメッセージと呼ばれる、変更の概要
+$ git commit -m"9回目授業の提出"
+
+# 変更を Codespace -> GitHub リポジトリにプッシュする
+$ git push origin main
+```
+
+フォークしたリポジトリに、今回の変更が反映されていることを確認する
 
 ---
 
