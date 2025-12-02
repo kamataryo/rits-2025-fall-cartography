@@ -49,7 +49,7 @@ https://maplibre.org/maplibre-style-spec/
 
 ---
 
-以下のサンプルを使い、解説していく:
+以下のサンプルを使い、解説していく（課題提出にも用いますので、フォークしてください）:
 https://github.com/kamataryo/rits-2025-fall-cartography__10-webmap-style-sample
 
 ---
@@ -180,11 +180,12 @@ https://docs.mapbox.com/style-spec/reference/expressions/#interpolate
 
 ## 課題
 
-- 国土数値情報等から興味のあるデータを最低2つ、GeoJSON としてダウンロード
+- [国土数値情報](https://nlftp.mlit.go.jp/ksj/) から興味のあるデータを最低2つ、GeoJSON としてダウンロード
+- ダウンロードするデータのライセンスを確認（CC-BY や 「非商用」など）
 - どのようなプロパティがあるのかを確認
 - リポジトリに配置して、source として読み込む
-- レイヤーを作成する。この際、1つのソースに対して、2つ以上のレイヤーを作成してください（合計4つ）
-- また、レイヤーのうち、少なくとも1つは、symbol レイヤーとしてください
+- レイヤーを作成する。この際、1つのソースに対して、2つ以上のレイヤーを作成してください（最低、合計4つ）
+- また、レイヤーのうち、少なくとも1つは、symbol レイヤーとしてください　  
 - スタイルを設定する。Filter 及び Expression をそれぞれ少なくとも1つ利用してください
 例:
   - 特定の値だけを持った地物のみを Filter で抽出する
@@ -192,10 +193,10 @@ https://docs.mapbox.com/style-spec/reference/expressions/#interpolate
 
 ---
 
-## 次回予告
+## 課題の提出方法
 
-### 第10回：ベクトルタイルの活用
-- ベクトルタイルの仕組みとフォーマット
+- フォークしたリポジトリの URL を提出
+- 期限: 2025/12/9 (火)
 
 ---
 
