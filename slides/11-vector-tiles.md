@@ -244,27 +244,112 @@ https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap-v1/{z}/{x}/{y}.pbf
 #### ステップ1: Maputnikを開く
 1. https://maputnik.github.io/editor/ にアクセス
 2. 画面上部の **"Open"** ボタンをクリック
-3. 次のソースとレイヤのサンプル入力する
+3. **"Empty Style"** を選択して空のスタイルから始める
 4. 検索窓で、「japan」などと検索して日本に移動
 
 ---
 
+### 実習2: デモタイルでスタイルを作成
+
+#### ステップ1: データソースの追加
+1. 画面上部の **"Sources"** ボタンをクリック
+2. **"Add Source"** を選択
+3. 以下の情報を入力:
+   ```
+   Source ID: demotile
+   Source Type: Vector (TileJSON URL)
+   TileJSON URL: https://demotiles.maplibre.org/tiles/tiles.json
+   ```
+4. **"Add"** をクリック
+
+---
+
+### 実習2: 続き - レイヤーの追加
+
+#### ステップ2: 全ての国を表示するレイヤー
+1. 左パネル下部の **"Add Layer"** をクリック
+2. 以下の設定を入力:
+   ```
+   ID: all
+   Type: Fill
+   Source: demotile
+   Source Layer: countries
+   ```
+3. 全ての国が表示されることを確認
+
+---
+
+#### ステップ3: 日本を赤く塗るレイヤー
+1. もう一度 **"Add Layer"** をクリック
+2. 以下の設定:
+   ```
+   ID: japan
+   Type: Fill
+   Source: demotile
+   Source Layer: countries
+   ```
+3. **"Filter"** セクションで **"Add filter"** をクリック
+4. 以下のフィルターを設定:
+   ```json
+   ["all", ["==", "NAME", "Japan"]]
+   ```
+5. **"Paint properties"** で `fill-color` を `#ff0000` (赤) に設定
+
+---
+
+#### ステップ4: 国名ラベルを追加
+1. **"Add Layer"** をクリック
+2. 以下の設定:
+   ```
+   ID: labels
+   Type: Symbol
+   Source: demotile
+   Source Layer: countries
+   ```
+3. **"Layout properties"** セクションを開く
+4. **"text-field"** に `{NAME}` を入力
+   - これで各国の `NAME` プロパティがラベルとして表示される
+
+---
+
+### 完成したスタイルのJSON
+
+ここまでの設定をJSONで表すと以下のようになります:
+
 ```json
 {
+  "version": 8,
+  "name": "Empty Style",
   "sources": {
     "demotile": {
       "type": "vector",
       "url": "https://demotiles.maplibre.org/tiles/tiles.json"
     }
   },
+  "glyphs": "https://orangemug.github.io/font-glyphs/glyphs/{fontstack}/{range}.pbf",
   "layers": [
     {
-      "id": "",
+      "id": "all",
       "type": "fill",
       "source": "demotile",
       "source-layer": "countries"
+    },
+    {
+      "id": "japan",
+      "type": "fill",
+      "source": "demotile",
+      "source-layer": "countries",
+      "filter": ["all", ["==", "NAME", "Japan"]],
+      "paint": {"fill-color": "red"}
+    },
+    {
+      "id": "labels",
+      "type": "symbol",
+      "source": "demotile",
+      "source-layer": "countries",
+      "layout": {"text-field": "{NAME}"}
     }
-  ],
+  ]
 }
 ```
 
@@ -272,230 +357,42 @@ https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap-v1/{z}/{x}/{y}.pbf
 
 ### ソースレイヤーについて
 
-- ベクトルタイルは、ソース内にレイヤーがある
-- これは、style.json のレイヤーとは**異なる**ので注意
-- 今回使うデモタイルでは、countries などがある
+#### ベクトルタイルの構造
+- ベクトルタイルは、**ソース内に複数のレイヤー**を持つ
+- これは、style.json のレイヤーとは**異なる**概念
+- **source-layer**: ベクトルタイル内のデータレイヤー
+- **layer (style)**: 描画方法を定義するスタイルレイヤー
 
-
-#### レイヤー構造を確認
-左パネルのレイヤーリストを見てみましょう:
-
+#### 今回のデモタイルの構造
 ```
-📁 background (背景色)
-📁 water (水域)
-📁 landcover (土地被覆)
-📁 park (公園)
-📁 building (建物)
-📁 road_* (道路の各種レイヤー)
-📁 place_* (地名ラベル)
+demotile (Source)
+  └─ countries (Source Layer)
+      ├─ NAME プロパティ
+      ├─ ABBREV プロパティ
+      └─ CONTINENT プロパティ
 ```
-
-**重要なポイント:**
-- レイヤーは**下から上に**描画される
-- 上のレイヤーが下のレイヤーを覆う
-- レイヤーの表示/非表示を切り替えられる
 
 ---
 
-### 実習3: 水域の色を変更
+### 重要なポイント
 
-#### ステップ1: waterレイヤーを選択
-1. 左パネルで **"water"** レイヤーをクリック
-2. 右パネルに設定が表示される
+#### レイヤーの描画順序
+- レイヤーは**配列の順序**で下から上に描画される
+- 今回の例:
+  1. `all` (全ての国) が最初に描画
+  2. `japan` (日本だけ赤) が上に描画
+  3. `labels` (国名) が最前面に描画
 
-#### ステップ2: 色を変更
-1. **"Paint properties"** セクションを確認
-2. **"fill-color"** の色をクリック
-3. カラーピッカーで好きな色を選択
-   - 例: `#3498db` (明るい青)
-   - 例: `#1abc9c` (青緑)
-
-#### ステップ3: 透明度を調整
-1. **"fill-opacity"** のスライダーを調整
-2. 0.0〜1.0の範囲で設定
-
----
-
-### 実習4: 道路のスタイリング
-
-#### ステップ1: 道路レイヤーを見つける
-1. `road_*` で始まるレイヤーを探す
-2. 例: `road_primary` (主要道路)
-
-#### ステップ2: 道路の色を変更
-```
-レイヤー: road_primary
-タイプ: line
-設定:
-  line-color: #f39c12 (オレンジ)
-  line-width: 3
-```
-
-#### ステップ3: ズームレベルで幅を変化
-1. **"line-width"** をクリック
-2. **"Function"** を選択
-3. ズームレベルごとに幅を設定:
-   ```
-   zoom 10: 1
-   zoom 14: 3
-   zoom 18: 8
-   ```
-
----
-
-### 実習5: 建物の3D表示(Extrusion)
-
-#### ステップ1: buildingレイヤーを選択
-
-#### ステップ2: 3D表示を有効化
-1. **"Paint properties"** で設定:
-   ```
-   fill-extrusion-height:
-     ["get", "render_height"]  # データの高さ属性を使用
-
-   fill-extrusion-base:
-     ["get", "render_min_height"]  # 基準高さ
-
-   fill-extrusion-color: #cccccc
-
-   fill-extrusion-opacity: 0.8
-   ```
-
-#### ステップ3: 地図を傾ける
-- マップ上で **Ctrl + ドラッグ** (Macは **Cmd + ドラッグ**)
-- 3D建物が表示される!
-
----
-
-### 実習6: データドリブンスタイリング
-
-#### 道路の種類で色分け
-
+#### フィルターの活用
 ```json
-{
-  "id": "road",
-  "type": "line",
-  "source": "openmaptiles",
-  "source-layer": "transportation",
-  "paint": {
-    "line-color": [
-      "match",
-      ["get", "class"],
-      "motorway", "#e74c3c",
-      "trunk", "#e67e22",
-      "primary", "#f39c12",
-      "secondary", "#f1c40f",
-      "tertiary", "#95a5a6",
-      "#bdc3c7"
-    ],
-    "line-width": [
-      "match",
-      ["get", "class"],
-      "motorway", 6,
-      "trunk", 5,
-      "primary", 4,
-      "secondary", 3,
-      "tertiary", 2,
-      1
-    ]
-  }
-}
+["==", "NAME", "Japan"]  // NAMEプロパティが"Japan"と等しい
+["all", ...]              // 全ての条件を満たす
 ```
 
-Maputnikで上記の設定を試してみましょう!
-
----
-
-### 実習7: ラベルのカスタマイズ
-
-#### 地名ラベルを見つける
-1. `place_*` レイヤーを探す
-2. 例: `place_city` (都市名)
-
-#### フォント設定
-```json
-{
-  "id": "place_city",
-  "type": "symbol",
-  "source": "openmaptiles",
-  "source-layer": "place",
-  "filter": ["==", ["get", "class"], "city"],
-  "layout": {
-    "text-field": ["get", "name"],
-    "text-font": ["Noto Sans Bold"],
-    "text-size": 14
-  },
-  "paint": {
-    "text-color": "#2c3e50",
-    "text-halo-color": "#ffffff",
-    "text-halo-width": 2
-  }
-}
+#### データプロパティの参照
 ```
-
----
-
-### 実習8: スタイルのエクスポート
-
-#### ステップ1: スタイルを保存
-1. 画面上部の **"Export"** ボタンをクリック
-2. **"Download Style"** を選択
-3. `style.json` ファイルがダウンロードされる
-
-#### ステップ2: MapLibre GL JSで使用
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
-  <link href='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css' rel='stylesheet' />
-</head>
-<body>
-  <div id="map" style="width: 100%; height: 600px;"></div>
-  <script>
-    const map = new maplibregl.Map({
-      container: 'map',
-      style: './style.json',  // エクスポートしたスタイル
-      center: [139.767, 35.681],
-      zoom: 12
-    });
-  </script>
-</body>
-</html>
+text-field: {NAME}       // プロパティを中括弧で参照
 ```
-
----
-
-### 実習のポイント
-
-#### tiles.jsonの重要性
-- Maputnikは**tiles.json**を読み込んでスキーマを理解
-- どんなレイヤーがあるか
-- どんなプロパティがあるか
-- ズームレベルの範囲は?
-
-#### データの見づらさへの対処
-- PBFは直接見られない
-- **Maputnikのプレビュー**で視覚的に確認
-- **Developer Tools → Network**でタイルのダウンロードを監視
-- `source-layer`の名前は**tiles.jsonで確認**
-
----
-
-### よくあるトラブルと解決方法
-
-#### 1. レイヤーが表示されない
-**チェックリスト:**
-- `source-layer` 名は正しい?
-- `filter` で除外されていない?
-- `minzoom`/`maxzoom` の範囲内?
-- レイヤーの順序は適切?
-
-#### 2. プロパティが見つからない
-**対処法:**
-- tiles.jsonで利用可能なプロパティを確認
-- Maputnikのインスペクタで実データを確認
-- `["get", "property_name"]` のスペルミスをチェック
 
 ---
 
@@ -504,105 +401,14 @@ Maputnikで上記の設定を試してみましょう!
 ## 課題:Maputnikで独自スタイルを作成
 
 ### 課題内容
-Maputnikを使用して、あなた独自の地図スタイルを作成してください。
 
-### 要件
-
-#### 1. 技術要件
-- **ベクトルタイルソース**を使用(OpenMapTiles、Protomaps等)
-- 最低**5種類のレイヤー**をカスタマイズ
-  - 例: water, building, road, park, labelなど
-- **データドリブンスタイリング**を1つ以上使用
-- **ズームレベル対応**のスタイリングを1つ以上実装
-
-#### 2. デザイン要件
-- **統一感のある配色**
-- **可読性の高いラベル**
-- **明確なテーマ**を持つこと
-  - 例: 「レトロな地図」「サイバーパンク風」「モノクローム」など
-
-</div>
+Maputnikを使用して、国を「大陸ごと」に塗り分ける地図スタイルを作成してください。
 
 ---
-
-<div class="assignment">
-
-### 提出物
-
-#### 1. スタイルJSONファイル
-- **ファイル名**: `[学籍番号]_style.json`
-- Maputnikからエクスポートしたスタイル定義
-
-#### 2. HTMLファイル
-- **ファイル名**: `[学籍番号]_map.html`
-- 作成したスタイルを使用した完全に動作する地図
-- スタイルJSONは**インライン**で埋め込む(外部ファイル参照不可)
-
-#### 3. デザインレポート
-- **形式**: A4用紙2枚程度(PDF形式)
-- **ファイル名**: `[学籍番号]_report.pdf`
-- **内容**:
-  - スタイルのコンセプト・テーマ
-  - カスタマイズしたレイヤーの説明
-  - 使用したデータドリブンスタイリングの解説
-  - 技術的に工夫した点
-  - 苦労した点と解決方法
-  - tiles.jsonの役割についての考察
-
-</div>
-
----
-
-<div class="assignment">
-
-### 評価基準
-- **技術的実装**(40%)
-  - データドリブンスタイリングの活用
-  - ズームレベル対応の実装
-  - レイヤーの適切な設定
-  - コードの品質
-- **デザイン性**(30%)
-  - テーマの明確さ
-  - 配色の統一感
-  - 視覚的な美しさ
-  - 可読性の高さ
-- **レポート**(30%)
-  - スタイル設計の説明
-  - 技術的考察の深さ
-  - tiles.jsonの理解度
-  - 文章の明瞭さ
 
 ### 提出期限・方法
-- **期限**: 次回授業開始時
-- **方法**: Manaba+R経由(3ファイルをZIPにまとめて提出)
-
-</div>
-
----
-
-## 次回予告
-
-### 第12回:高度な地図アプリケーション開発
-- カスタムコントロールの実装
-- 地図とUIの統合
-- パフォーマンスチューニング
-- プラグインの活用
-
-### 準備事項
-- 今回作成したスタイルの動作確認
-- Maputnikの使い方の復習
-- MapLibre GL JS APIドキュメントの確認
-
----
-
-## 質疑応答
-
-### 本日の内容について
-- ベクトルタイルの仕組み
-- PBF形式とtiles.json
-- Tippecanoeの使い方
-- Maputnikでのスタイリング
-- 課題に関する質問
+- **期限**: TODO:
+- **方法**: Manaba+R経由
 
 ---
 
@@ -611,8 +417,5 @@ Maputnikを使用して、あなた独自の地図スタイルを作成してく
 # ありがとうございました
 
 ## 次回もよろしくお願いします
-
-**第12回:高度な地図アプリケーション開発**
-[日時・教室]
 
 課題の提出をお忘れなく!
