@@ -24,627 +24,502 @@ section.title::after { top: 21px; }
 
 # MapLibre GL JS と OpenStreetMap で始める<br />ウェブカートグラフィ入門
 
-## 第10回：ベクトルタイルの活用
+## 第11回:ベクトルタイルの仕組みと実践
 
 立命館大学 2025年度 秋セメスター 火曜5限
-授業時間：95分
+授業時間:95分
 
 ---
 
 ## 本日のアジェンダ
 
-1. **前回の振り返り・課題確認** (12分)
-2. **ベクトルタイルの仕組みとフォーマット** (28分)
-3. **MapLibre GL JS でのベクトルタイル利用** (28分)
-4. **パフォーマンス最適化** (22分)
-5. **課題説明** (5分)
+2. **ベクトルタイルとは何か**
+3. **ベクトルタイルの形式とスキーマ**
+4. **Tippecanoeによるタイル生成**
+5. **Maputnikによるスタイル編集実習**
+6. **課題説明**
 
 ---
 
-## 前回の振り返り
+## ベクトルタイルとは何か
 
-### 第9回の主要ポイント
-- 地図デザインの基本原則（視覚的階層・色彩理論・可読性・一貫性）
-- ポイント・ライン・ポリゴンの詳細スタイリング
-- データドリブンスタイリングの活用
-- ズームレベル対応の表示制御
-- アクセシビリティへの配慮
+### なぜベクトルタイルが必要なのか?
 
-### 課題の確認
-GeoJSONデータへの多様なスタイリング適用
-- スタイリング技術の確認
-- デザイン品質の評価
-- 技術的実装の検証
-- 設計思想の理解
-
----
-
-## ベクトルタイルの仕組みとフォーマット
-
-### ベクトルタイルとは？
-
-#### 定義
-> ベクトルタイルは、地理空間のベクターデータを効率的に配信するためのタイル形式
-
-#### 特徴
-- **ベクターデータ**：点・線・面の座標情報
-- **タイル分割**：256×256ピクセル単位での分割
-- **階層構造**：ズームレベルごとの詳細度
-- **効率的配信**：必要な部分のみダウンロード
-
----
-
-### ラスタータイル vs ベクトータイル（再確認）
-
-| 特徴 | ラスタータイル | ベクトータイル |
-|------|----------------|----------------|
-| **データ形式** | 画像（PNG/JPEG） | ベクターデータ |
-| **ファイルサイズ** | 大きい | 小さい |
-| **スタイル変更** | 不可 | 可能 |
-| **高解像度対応** | 困難 | 容易 |
-| **インタラクション** | 制限あり | 豊富 |
-| **生成コスト** | 低い | 高い |
-| **クライアント負荷** | 低い | 高い |
-
----
-
-### ベクトータイルのフォーマット
-
-#### 1. Mapbox Vector Tiles (MVT)
-- **形式**：Protocol Buffers (PBF)
-- **特徴**：バイナリ形式、高効率
-- **標準化**：OGC標準として採用
-- **拡張子**：`.pbf` または `.mvt`
-
-#### 2. GeoJSON タイル
-- **形式**：JSON テキスト
-- **特徴**：人間が読みやすい
-- **用途**：開発・デバッグ用途
-- **拡張子**：`.geojson`
-
----
-
-### MVT（Mapbox Vector Tiles）の詳細
-
-#### データ構造
-```
-タイル
-├── レイヤー1（例：道路）
-│   ├── フィーチャー1
-│   ├── フィーチャー2
-│   └── ...
-├── レイヤー2（例：建物）
-│   ├── フィーチャー1
-│   └── ...
-└── レイヤー3（例：水域）
+```javascript
+// 全世界の道路データをGeoJSONで配信すると...
+{
+  "type": "FeatureCollection",
+  "features": [
+    // 数百万〜数千万(?)のフィーチャー
+    // ファイルサイズ: 数十GB〜数百GB
+  ]
+}
 ```
 
-#### 座標系
-- **タイル座標系**：0-4095の整数座標
-- **高精度**：小数点以下の精度も保持
-- **効率性**：整数演算による高速処理
+- **膨大なファイルサイズ**: 全データを一度にダウンロードは不可能
+- **読み込み時間**: ユーザーは待てない
+- **メモリ消費**: ブラウザがクラッシュする可能性
+- **帯域幅**: モバイル環境では特に深刻
 
 ---
 
-### ベクトータイルの生成
+## 解決策:タイル分割方式
 
-#### データソース
-- **OpenStreetMap**：全世界の地図データ
-- **政府オープンデータ**：国土地理院、自治体データ
-- **商用データ**：HERE、TomTom等
-- **独自データ**：企業・組織の内部データ
+#### ラスタータイルと同じ発想
+```
+全世界のデータを小さなタイルに分割
+→ 必要な部分だけ配信
+```
 
-#### 生成ツール
-- **Tippecanoe**：Mapbox製のタイル生成ツール
-- **PostGIS + ST_AsMVT**：PostgreSQL拡張
-- **GeoServer**：オープンソースGISサーバー
-- **GDAL/OGR**：地理空間データ変換ライブラリ
+#### ベクトルタイルの特徴
+- **タイル分割**: 256×256ピクセル単位
+- **階層構造**: ズームレベル0〜14(またはそれ以上)
+- **逐次配信**: 表示領域のタイルのみダウンロード
+- **軽量**: 一般的にラスタータイルより小さい
+- **柔軟**: クライアント側でスタイル変更可能
 
 ---
 
-### タイル生成の実例
+### ベクトルタイルの配信方式
 
-#### Tippecanoe を使用した生成
+#### タイルの命名規則
+```
+/{z}/{x}/{y}.pbf
+```
+
+**例:**
+```
+/14/14550/6451.pbf  # 東京付近のタイル(ズーム14)
+/10/909/403.pbf     # 日本列島のタイル(ズーム10)
+/5/28/12.pbf        # アジア地域のタイル(ズーム5)
+```
+
+---
+
+## ベクトルタイルの形式とスキーマ
+
+### PBF (Protocol Buffers) 形式
+
+#### なぜPBFなのか?
+
+**GeoJSON形式の問題:**
+```json
+{
+  "type": "Feature",
+  "geometry": {"type": "Point", "coordinates": [139.767, 35.681]},
+  "properties": {"name": "東京", "population": 13960000}
+}
+```
+- テキスト形式で冗長
+- 数値を文字列として保存
+- ファイルサイズが大きい
+
+---
+
+## PBF (Protocol Buffers) の利点
+
+- **バイナリ形式**: 効率的なデータ表現
+- **圧縮効率**: データによるが、GeoJSONの数分の1のサイズ
+- **高速パース**: 読み書きが速い
+
+### サイズ比較例
+
+地理院ベクトルタイルからサンプルを抽出:
+https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap-v1/14/14550/6451.pbf
+
+
+```plaintext
+GeoJSON: 1.7 MB
+PBF:     84 KB (約21分の1)
+```
+
+---
+
+## Tippecanoeによるタイル生成
+
+### Tippecanoeとは?
+
+**Mapbox製のベクトルタイル生成ツール**
+- GeoJSON → ベクトルタイル (MBTiles) への変換
+- 自動的な詳細度調整
+- 効率的なデータ圧縮
+
+---s
+
+#### インストール(macOS)
 ```bash
-# GeoJSONからベクトータイルを生成
+brew install tippecanoe
+```
+
+#### インストール(Linux)
+```bash
+git clone https://github.com/felt/tippecanoe.git
+cd tippecanoe
+make -j
+sudo make install
+```
+
+---
+
+### 基本的なワークフロー
+
+#### 1. GeoJSONデータの準備
+```bash
+# データの確認
+head input.geojson
+```
+
+#### 2. ベクトルタイルの生成
+```bash
 tippecanoe -o output.mbtiles \
-  --minimum-zoom=0 \
-  --maximum-zoom=14 \
+  --minimum-zoom=0 --maximum-zoom=14 \
   --drop-densest-as-needed \
   --extend-zooms-if-still-dropping \
   input.geojson
+```
 
-# 生成されたタイルの確認
+**主要オプション:**
+- `--minimum-zoom`: 最小ズームレベル
+- `--maximum-zoom`: 最大ズームレベル
+- `--drop-densest-as-needed`: 自動間引き
+- `--layer=name`: レイヤー名の指定
+
+---
+
+#### 3. MBTilesからタイルを抽出(オプション)
+```bash
 tile-join --no-tile-compression \
   --output-to-directory=tiles/ \
   output.mbtiles
 ```
 
-#### PostGIS での生成
-```sql
--- ベクトータイルの生成
-SELECT ST_AsMVT(tile, 'layer_name', 4096, 'geom')
-FROM (
-  SELECT 
-    id,
-    name,
-    category,
-    ST_AsMVTGeom(
-      geom,
-      ST_TileEnvelope(14, 8800, 5400),  -- z, x, y
-      4096,
-      256,
-      true
-    ) AS geom
-  FROM poi_table
-  WHERE geom && ST_TileEnvelope(14, 8800, 5400)
-) AS tile;
+これにより `tiles/{z}/{x}/{y}.pbf` の形式でファイルが生成されます。
+
+#### 4. tiles.jsonの作成
+```bash
+# MBTilesからメタデータを抽出
+mb-util --image_format=pbf output.mbtiles tiles/
+```
+
+**本授業では詳細には触れませんが、実務では重要なツールです。**
+
+---
+
+## Maputnikによるスタイル編集(実習)
+
+### Maputnikとは?
+
+**ビジュアルスタイルエディタ**
+- MapLibre/Mapboxのスタイル仕様に対応
+- ブラウザベースのGUIエディタ
+- リアルタイムプレビュー
+- オープンソース
+
+**公式サイト:**
+https://maputnik.github.io/
+
+---
+
+### Maputnikの起動
+
+#### オンライン版
+https://maputnik.github.io/editor/
+
+---
+
+### 実習の準備
+
+#### 使用するデータソース
+今回は以下のベクトルタイルソースを使用します:
+
+```shell
+# 国土地理院ベクトルタイル(実験的)
+https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap-v1/{z}/{x}/{y}.pbf
 ```
 
 ---
 
-## MapLibre GL JS でのベクトルタイル利用
+### 実習1: スタイルの読み込みとベースマップの確認
 
-### ベクトータイルソースの設定
-
-#### 基本的な設定
-```javascript
-map.addSource('vector-source', {
-  type: 'vector',
-  tiles: ['https://example.com/tiles/{z}/{x}/{y}.pbf'],
-  minzoom: 0,
-  maxzoom: 14
-});
-```
-
-#### MBTiles ファイルの使用
-```javascript
-map.addSource('local-tiles', {
-  type: 'vector',
-  url: 'pmtiles://path/to/tiles.pmtiles'  // PMTiles形式
-});
-```
+#### ステップ1: Maputnikを開く
+1. https://maputnik.github.io/editor/ にアクセス
+2. 画面上部の **"Open"** ボタンをクリック
+3. 次のソースとレイヤのサンプル入力する
+4. 検索窓で、「japan」などと検索して日本に移動
 
 ---
 
-### レイヤーの追加
-
-#### ソースレイヤーの指定
-```javascript
-map.addLayer({
-  id: 'roads',
-  type: 'line',
-  source: 'vector-source',
-  'source-layer': 'transportation',  // ベクトータイル内のレイヤー名
-  filter: ['==', ['get', 'class'], 'primary'],
-  paint: {
-    'line-color': '#ff6b35',
-    'line-width': 3
-  }
-});
-```
-
-#### 複数レイヤーの活用
-```javascript
-// 建物レイヤー
-map.addLayer({
-  id: 'buildings',
-  type: 'fill',
-  source: 'vector-source',
-  'source-layer': 'building',
-  paint: {
-    'fill-color': '#d6d6d6',
-    'fill-opacity': 0.8
-  }
-});
-
-// 水域レイヤー
-map.addLayer({
-  id: 'water',
-  type: 'fill',
-  source: 'vector-source',
-  'source-layer': 'water',
-  paint: {
-    'fill-color': '#4fc3f7'
-  }
-});
-```
-
----
-
-### フィルタリングの活用
-
-#### 属性による絞り込み
-```javascript
-map.addLayer({
-  id: 'highways',
-  type: 'line',
-  source: 'osm-vector',
-  'source-layer': 'transportation',
-  filter: [
-    'in',
-    ['get', 'class'],
-    ['literal', ['motorway', 'trunk', 'primary']]
+```json
+{
+  "sources": {
+    "demotile": {
+      "type": "vector",
+      "url": "https://demotiles.maplibre.org/tiles/tiles.json"
+    }
+  },
+  "layers": [
+    {
+      "id": "",
+      "type": "fill",
+      "source": "demotile",
+      "source-layer": "countries"
+    }
   ],
-  paint: {
-    'line-color': [
-      'match',
-      ['get', 'class'],
-      'motorway', '#e74c3c',
-      'trunk', '#f39c12',
-      'primary', '#f1c40f',
-      '#bdc3c7'
+}
+```
+
+---
+
+### ソースレイヤーについて
+
+- ベクトルタイルは、ソース内にレイヤーがある
+- これは、style.json のレイヤーとは**異なる**ので注意
+- 今回使うデモタイルでは、countries などがある
+
+
+#### レイヤー構造を確認
+左パネルのレイヤーリストを見てみましょう:
+
+```
+📁 background (背景色)
+📁 water (水域)
+📁 landcover (土地被覆)
+📁 park (公園)
+📁 building (建物)
+📁 road_* (道路の各種レイヤー)
+📁 place_* (地名ラベル)
+```
+
+**重要なポイント:**
+- レイヤーは**下から上に**描画される
+- 上のレイヤーが下のレイヤーを覆う
+- レイヤーの表示/非表示を切り替えられる
+
+---
+
+### 実習3: 水域の色を変更
+
+#### ステップ1: waterレイヤーを選択
+1. 左パネルで **"water"** レイヤーをクリック
+2. 右パネルに設定が表示される
+
+#### ステップ2: 色を変更
+1. **"Paint properties"** セクションを確認
+2. **"fill-color"** の色をクリック
+3. カラーピッカーで好きな色を選択
+   - 例: `#3498db` (明るい青)
+   - 例: `#1abc9c` (青緑)
+
+#### ステップ3: 透明度を調整
+1. **"fill-opacity"** のスライダーを調整
+2. 0.0〜1.0の範囲で設定
+
+---
+
+### 実習4: 道路のスタイリング
+
+#### ステップ1: 道路レイヤーを見つける
+1. `road_*` で始まるレイヤーを探す
+2. 例: `road_primary` (主要道路)
+
+#### ステップ2: 道路の色を変更
+```
+レイヤー: road_primary
+タイプ: line
+設定:
+  line-color: #f39c12 (オレンジ)
+  line-width: 3
+```
+
+#### ステップ3: ズームレベルで幅を変化
+1. **"line-width"** をクリック
+2. **"Function"** を選択
+3. ズームレベルごとに幅を設定:
+   ```
+   zoom 10: 1
+   zoom 14: 3
+   zoom 18: 8
+   ```
+
+---
+
+### 実習5: 建物の3D表示(Extrusion)
+
+#### ステップ1: buildingレイヤーを選択
+
+#### ステップ2: 3D表示を有効化
+1. **"Paint properties"** で設定:
+   ```
+   fill-extrusion-height:
+     ["get", "render_height"]  # データの高さ属性を使用
+
+   fill-extrusion-base:
+     ["get", "render_min_height"]  # 基準高さ
+
+   fill-extrusion-color: #cccccc
+
+   fill-extrusion-opacity: 0.8
+   ```
+
+#### ステップ3: 地図を傾ける
+- マップ上で **Ctrl + ドラッグ** (Macは **Cmd + ドラッグ**)
+- 3D建物が表示される!
+
+---
+
+### 実習6: データドリブンスタイリング
+
+#### 道路の種類で色分け
+
+```json
+{
+  "id": "road",
+  "type": "line",
+  "source": "openmaptiles",
+  "source-layer": "transportation",
+  "paint": {
+    "line-color": [
+      "match",
+      ["get", "class"],
+      "motorway", "#e74c3c",
+      "trunk", "#e67e22",
+      "primary", "#f39c12",
+      "secondary", "#f1c40f",
+      "tertiary", "#95a5a6",
+      "#bdc3c7"
     ],
-    'line-width': [
-      'match',
-      ['get', 'class'],
-      'motorway', 6,
-      'trunk', 5,
-      'primary', 4,
-      2
-    ]
-  }
-});
-```
-
----
-
-#### ズームレベルによる表示制御
-```javascript
-map.addLayer({
-  id: 'detailed-roads',
-  type: 'line',
-  source: 'osm-vector',
-  'source-layer': 'transportation',
-  filter: [
-    'all',
-    ['>=', ['zoom'], 12],  // ズーム12以上で表示
-    ['in', ['get', 'class'], ['literal', ['secondary', 'tertiary']]]
-  ],
-  paint: {
-    'line-color': '#95a5a6',
-    'line-width': [
-      'interpolate',
-      ['linear'],
-      ['zoom'],
-      12, 1,
-      16, 3
-    ]
-  }
-});
-```
-
----
-
-### 実用的なベクトータイルサービス
-
-#### 1. OpenMapTiles
-```javascript
-map.addSource('openmaptiles', {
-  type: 'vector',
-  url: 'https://api.maptiler.com/tiles/v3/tiles.json?key=YOUR_API_KEY'
-});
-```
-
-#### 2. Protomaps
-```javascript
-map.addSource('protomaps', {
-  type: 'vector',
-  tiles: ['https://api.protomaps.com/tiles/v2/{z}/{x}/{y}.pbf?key=YOUR_API_KEY'],
-  attribution: '© Protomaps'
-});
-```
-
-#### 3. 国土地理院ベクトルタイル
-```javascript
-map.addSource('gsi-vector', {
-  type: 'vector',
-  tiles: ['https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/{z}/{x}/{y}.pbf'],
-  attribution: '© 国土地理院'
-});
-```
-
----
-
-### カスタムベクトータイルの作成
-
-#### 小規模データの場合
-```javascript
-// GeoJSONからベクトータイルを動的生成
-import { geojsonvt } from '@mapbox/geojson-vt';
-
-const tileIndex = geojsonvt(geojsonData, {
-  maxZoom: 14,
-  tolerance: 3,
-  extent: 4096,
-  buffer: 64
-});
-
-// カスタムソースの実装
-map.addSource('custom-vector', {
-  type: 'geojson',
-  data: geojsonData  // 小規模な場合はGeoJSONのまま使用
-});
-```
-
----
-
-## パフォーマンス最適化
-
-### ベクトータイルの最適化戦略
-
-#### 1. 適切なズームレベル設定
-```javascript
-// データの詳細度に応じたズーム範囲
-map.addSource('poi-tiles', {
-  type: 'vector',
-  tiles: ['https://example.com/poi/{z}/{x}/{y}.pbf'],
-  minzoom: 10,  // 詳細なPOIは高ズームから
-  maxzoom: 16
-});
-
-map.addSource('country-tiles', {
-  type: 'vector',
-  tiles: ['https://example.com/countries/{z}/{x}/{y}.pbf'],
-  minzoom: 0,   // 国境は低ズームから
-  maxzoom: 6
-});
-```
-
----
-
-#### 2. レイヤーの表示制御
-```javascript
-// ズームレベルに応じた段階的表示
-map.addLayer({
-  id: 'cities-large',
-  type: 'circle',
-  source: 'cities',
-  'source-layer': 'cities',
-  filter: [
-    'all',
-    ['<=', ['zoom'], 8],
-    ['>=', ['get', 'population'], 1000000]
-  ],
-  paint: {
-    'circle-radius': 8,
-    'circle-color': '#e74c3c'
-  }
-});
-
-map.addLayer({
-  id: 'cities-medium',
-  type: 'circle',
-  source: 'cities',
-  'source-layer': 'cities',
-  filter: [
-    'all',
-    ['>', ['zoom'], 8],
-    ['<=', ['zoom'], 12],
-    ['>=', ['get', 'population'], 100000]
-  ],
-  paint: {
-    'circle-radius': 6,
-    'circle-color': '#f39c12'
-  }
-});
-```
-
----
-
-#### 3. データの簡略化
-```javascript
-// 低ズームレベルでの簡略化
-map.addLayer({
-  id: 'roads-simplified',
-  type: 'line',
-  source: 'roads',
-  'source-layer': 'transportation',
-  filter: ['<=', ['zoom'], 10],
-  paint: {
-    'line-color': '#34495e',
-    'line-width': [
-      'case',
-      ['==', ['get', 'class'], 'motorway'], 3,
-      ['==', ['get', 'class'], 'primary'], 2,
+    "line-width": [
+      "match",
+      ["get", "class"],
+      "motorway", 6,
+      "trunk", 5,
+      "primary", 4,
+      "secondary", 3,
+      "tertiary", 2,
       1
     ]
   }
-});
+}
+```
 
-map.addLayer({
-  id: 'roads-detailed',
-  type: 'line',
-  source: 'roads',
-  'source-layer': 'transportation',
-  filter: ['>', ['zoom'], 10],
-  paint: {
-    'line-color': '#2c3e50',
-    'line-width': [
-      'interpolate',
-      ['linear'],
-      ['zoom'],
-      10, 1,
-      16, 6
-    ]
+Maputnikで上記の設定を試してみましょう!
+
+---
+
+### 実習7: ラベルのカスタマイズ
+
+#### 地名ラベルを見つける
+1. `place_*` レイヤーを探す
+2. 例: `place_city` (都市名)
+
+#### フォント設定
+```json
+{
+  "id": "place_city",
+  "type": "symbol",
+  "source": "openmaptiles",
+  "source-layer": "place",
+  "filter": ["==", ["get", "class"], "city"],
+  "layout": {
+    "text-field": ["get", "name"],
+    "text-font": ["Noto Sans Bold"],
+    "text-size": 14
+  },
+  "paint": {
+    "text-color": "#2c3e50",
+    "text-halo-color": "#ffffff",
+    "text-halo-width": 2
   }
-});
+}
 ```
 
 ---
 
-### メモリとネットワークの最適化
+### 実習8: スタイルのエクスポート
 
-#### キャッシュ戦略
-```javascript
-// ソース設定でのキャッシュ制御
-map.addSource('cached-tiles', {
-  type: 'vector',
-  tiles: ['https://example.com/tiles/{z}/{x}/{y}.pbf'],
-  scheme: 'xyz',
-  attribution: '© Example',
-  // ブラウザキャッシュの活用
-  headers: {
-    'Cache-Control': 'max-age=3600'
-  }
-});
-```
+#### ステップ1: スタイルを保存
+1. 画面上部の **"Export"** ボタンをクリック
+2. **"Download Style"** を選択
+3. `style.json` ファイルがダウンロードされる
 
-#### プリロード戦略
-```javascript
-// 重要なタイルの事前読み込み
-map.on('load', () => {
-  // 現在の表示範囲周辺のタイルをプリロード
-  const bounds = map.getBounds();
-  const zoom = map.getZoom();
-  
-  // 周辺タイルの事前取得（実装は省略）
-  preloadTiles(bounds, zoom + 1);
-});
-```
-
----
-
-### レンダリング最適化
-
-#### レイヤーの統合
-```javascript
-// 複数の小さなレイヤーを統合
-map.addLayer({
-  id: 'combined-pois',
-  type: 'circle',
-  source: 'poi-tiles',
-  'source-layer': 'pois',
-  paint: {
-    'circle-radius': [
-      'match',
-      ['get', 'category'],
-      'restaurant', 8,
-      'hotel', 6,
-      'shop', 4,
-      3
-    ],
-    'circle-color': [
-      'match',
-      ['get', 'category'],
-      'restaurant', '#e74c3c',
-      'hotel', '#3498db',
-      'shop', '#2ecc71',
-      '#95a5a6'
-    ]
-  }
-});
+#### ステップ2: MapLibre GL JSで使用
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <script src='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js'></script>
+  <link href='https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css' rel='stylesheet' />
+</head>
+<body>
+  <div id="map" style="width: 100%; height: 600px;"></div>
+  <script>
+    const map = new maplibregl.Map({
+      container: 'map',
+      style: './style.json',  // エクスポートしたスタイル
+      center: [139.767, 35.681],
+      zoom: 12
+    });
+  </script>
+</body>
+</html>
 ```
 
 ---
 
-#### 条件付きレンダリング
-```javascript
-// 必要な時のみレンダリング
-let detailLayersVisible = false;
+### 実習のポイント
 
-map.on('zoom', () => {
-  const zoom = map.getZoom();
-  
-  if (zoom >= 14 && !detailLayersVisible) {
-    // 詳細レイヤーを表示
-    map.setLayoutProperty('building-details', 'visibility', 'visible');
-    map.setLayoutProperty('road-labels', 'visibility', 'visible');
-    detailLayersVisible = true;
-  } else if (zoom < 14 && detailLayersVisible) {
-    // 詳細レイヤーを非表示
-    map.setLayoutProperty('building-details', 'visibility', 'none');
-    map.setLayoutProperty('road-labels', 'visibility', 'none');
-    detailLayersVisible = false;
-  }
-});
-```
+#### tiles.jsonの重要性
+- Maputnikは**tiles.json**を読み込んでスキーマを理解
+- どんなレイヤーがあるか
+- どんなプロパティがあるか
+- ズームレベルの範囲は?
+
+#### データの見づらさへの対処
+- PBFは直接見られない
+- **Maputnikのプレビュー**で視覚的に確認
+- **Developer Tools → Network**でタイルのダウンロードを監視
+- `source-layer`の名前は**tiles.jsonで確認**
 
 ---
 
-### 大量データの処理
+### よくあるトラブルと解決方法
 
-#### クラスタリング
-```javascript
-map.addSource('clustered-points', {
-  type: 'geojson',
-  data: largePointDataset,
-  cluster: true,
-  clusterMaxZoom: 14,
-  clusterRadius: 50
-});
+#### 1. レイヤーが表示されない
+**チェックリスト:**
+- `source-layer` 名は正しい?
+- `filter` で除外されていない?
+- `minzoom`/`maxzoom` の範囲内?
+- レイヤーの順序は適切?
 
-// クラスターの表示
-map.addLayer({
-  id: 'clusters',
-  type: 'circle',
-  source: 'clustered-points',
-  filter: ['has', 'point_count'],
-  paint: {
-    'circle-color': [
-      'step',
-      ['get', 'point_count'],
-      '#51bbd6',
-      100, '#f1f075',
-      750, '#f28cb1'
-    ],
-    'circle-radius': [
-      'step',
-      ['get', 'point_count'],
-      20,
-      100, 30,
-      750, 40
-    ]
-  }
-});
-```
+#### 2. プロパティが見つからない
+**対処法:**
+- tiles.jsonで利用可能なプロパティを確認
+- Maputnikのインスペクタで実データを確認
+- `["get", "property_name"]` のスペルミスをチェック
 
 ---
 
 <div class="assignment">
 
-## 課題：ベクトルタイルを使った地図を作成
+## 課題:Maputnikで独自スタイルを作成
 
 ### 課題内容
-ベクトルタイルサービスを活用して、効率的で美しい地図アプリケーションを作成してください。
+Maputnikを使用して、あなた独自の地図スタイルを作成してください。
 
 ### 要件
 
 #### 1. 技術要件
-- **ベクトータイルソース** の使用（OpenMapTiles、Protomaps等）
-- **複数のソースレイヤー** の活用
-- **適切なフィルタリング** の実装
-- **パフォーマンス最適化** の考慮
+- **ベクトルタイルソース**を使用(OpenMapTiles、Protomaps等)
+- 最低**5種類のレイヤー**をカスタマイズ
+  - 例: water, building, road, park, labelなど
+- **データドリブンスタイリング**を1つ以上使用
+- **ズームレベル対応**のスタイリングを1つ以上実装
 
-#### 2. 機能要件
-- **ズームレベル対応** の表示制御
-- **レイヤー切り替え** 機能
-- **インタラクティブ要素** の実装
-- **レスポンシブデザイン**
-
-</div>
-
----
-
-<div class="assignment">
-
-#### 3. デザイン要件
-- **統一感のあるスタイル**
-- **適切な情報階層**
-- **ユーザビリティ** の考慮
-- **視覚的な美しさ**
-
-#### 4. 最適化要件
-- **効率的なレイヤー管理**
-- **適切なズーム範囲設定**
-- **メモリ使用量の最適化**
-
-### 実装すべき機能
-- ベクトータイルの基本表示
-- 複数レイヤーの重ね合わせ
-- ズームレベルに応じた表示制御
-- フィルタリング機能
-- パフォーマンス監視（オプション）
+#### 2. デザイン要件
+- **統一感のある配色**
+- **可読性の高いラベル**
+- **明確なテーマ**を持つこと
+  - 例: 「レトロな地図」「サイバーパンク風」「モノクローム」など
 
 </div>
 
@@ -654,20 +529,25 @@ map.addLayer({
 
 ### 提出物
 
-#### 1. HTML ファイル
-- **ファイル名**：`[学籍番号]_vector_map.html`
-- **完全に動作する** 単一のHTMLファイル
-- **ベクトータイル** を使用した実装
+#### 1. スタイルJSONファイル
+- **ファイル名**: `[学籍番号]_style.json`
+- Maputnikからエクスポートしたスタイル定義
 
-#### 2. 技術レポート
-- **形式**：A4用紙2-3枚程度（PDF形式）
-- **内容**：
-  - 使用したベクトータイルサービス
-  - レイヤー構成と設計思想
-  - フィルタリング・最適化の実装
-  - パフォーマンス考慮点
-  - 技術的な課題と解決方法
-  - ラスタータイルとの比較考察
+#### 2. HTMLファイル
+- **ファイル名**: `[学籍番号]_map.html`
+- 作成したスタイルを使用した完全に動作する地図
+- スタイルJSONは**インライン**で埋め込む(外部ファイル参照不可)
+
+#### 3. デザインレポート
+- **形式**: A4用紙2枚程度(PDF形式)
+- **ファイル名**: `[学籍番号]_report.pdf`
+- **内容**:
+  - スタイルのコンセプト・テーマ
+  - カスタマイズしたレイヤーの説明
+  - 使用したデータドリブンスタイリングの解説
+  - 技術的に工夫した点
+  - 苦労した点と解決方法
+  - tiles.jsonの役割についての考察
 
 </div>
 
@@ -676,26 +556,25 @@ map.addLayer({
 <div class="assignment">
 
 ### 評価基準
-- **技術的実装**（40%）
-  - ベクトータイルの正しい使用
-  - フィルタリング・最適化の実装
+- **技術的実装**(40%)
+  - データドリブンスタイリングの活用
+  - ズームレベル対応の実装
+  - レイヤーの適切な設定
   - コードの品質
-- **機能性**（25%）
-  - レイヤー切り替え機能
-  - ズームレベル対応
-  - インタラクション実装
-- **パフォーマンス**（20%）
-  - 表示速度の最適化
-  - メモリ効率
-  - ネットワーク効率
-- **設計・考察**（15%）
-  - 技術選択の妥当性
-  - レポートの質
-  - 理論的理解
+- **デザイン性**(30%)
+  - テーマの明確さ
+  - 配色の統一感
+  - 視覚的な美しさ
+  - 可読性の高さ
+- **レポート**(30%)
+  - スタイル設計の説明
+  - 技術的考察の深さ
+  - tiles.jsonの理解度
+  - 文章の明瞭さ
 
 ### 提出期限・方法
-- **期限**：次回授業開始時
-- **方法**：Manaba+R経由
+- **期限**: 次回授業開始時
+- **方法**: Manaba+R経由(3ファイルをZIPにまとめて提出)
 
 </div>
 
@@ -703,29 +582,27 @@ map.addLayer({
 
 ## 次回予告
 
-### 第11回：応用プロジェクト（1）- 地図プロジェクトの企画
-- 地図を利用したテーマ選定
-- 必要なデータの準備と設計
-- 簡単なプロトタイプの作成
-- プロジェクト計画の立案
-- ディスカッションとフィードバック
+### 第12回:高度な地図アプリケーション開発
+- カスタムコントロールの実装
+- 地図とUIの統合
+- パフォーマンスチューニング
+- プラグインの活用
 
 ### 準備事項
-- 今回作成したベクトータイル地図の動作確認
-- 最終プロジェクトのテーマ検討
-- 利用可能なデータソースの調査
-- 技術的な実現可能性の検討
+- 今回作成したスタイルの動作確認
+- Maputnikの使い方の復習
+- MapLibre GL JS APIドキュメントの確認
 
 ---
 
 ## 質疑応答
 
 ### 本日の内容について
-- ベクトータイルの仕組み・フォーマット
-- MapLibre GL JS での利用方法
-- パフォーマンス最適化技術
-- 大量データの処理方法
-- 課題に関する技術的な質問
+- ベクトルタイルの仕組み
+- PBF形式とtiles.json
+- Tippecanoeの使い方
+- Maputnikでのスタイリング
+- 課題に関する質問
 
 ---
 
@@ -735,7 +612,7 @@ map.addLayer({
 
 ## 次回もよろしくお願いします
 
-**第11回：応用プロジェクト（1）- 地図プロジェクトの企画**
+**第12回:高度な地図アプリケーション開発**
 [日時・教室]
 
-課題の提出をお忘れなく！
+課題の提出をお忘れなく!
