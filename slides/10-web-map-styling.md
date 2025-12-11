@@ -163,6 +163,8 @@ filter:['==', ['get', 'amenity'], 'university'],
 - Maplibre Style Spec は**ポーランド記法**的な定義を採用している
 - JSON フォーマットによって複雑な地図スタイルを静的かつ柔軟に定義することが可能
 
+---
+
 ## Expression の例
 
 ```Javascript
@@ -196,7 +198,7 @@ https://docs.mapbox.com/style-spec/reference/expressions/#interpolate
 ## 課題の提出方法
 
 - フォークしたリポジトリの URL を提出
-- 期限: 2025/12/9 (火)
+- 期限: 2025/12/16 (火)
 
 ---
 
